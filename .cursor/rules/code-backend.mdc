@@ -1,0 +1,622 @@
+---
+description: Padrões de codificação do projeto
+globs:
+alwaysApply: true
+---
+
+# Regras de Código - TribeSend
+
+## Early Returns (Evitar else)
+
+- **SEMPRE** use early returns para reduzir aninhamento e melhorar legibilidade
+- Evite estruturas `if/else` desnecessárias retornando cedo em condições de erro ou casos especiais
+- Prefira guard clauses no início dos métodos
+
+### ✅ Correto:
+```php
+public function processUser(User $user): bool
+{
+    if (!$user->isActive()) {
+        return false;
+    }
+    
+    if (!$user->hasPermission('process')) {
+        return false;
+    }
+    
+    // Lógica principal aqui
+    return $this->performProcessing($user);
+}
+```
+
+### ❌ Incorreto:
+```php
+public function processUser(User $user): bool
+{
+    if ($user->isActive()) {
+        if ($user->hasPermission('process')) {
+            // Lógica principal aqui
+            return $this->performProcessing($user);
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+```
+
+## PSR-12 - Padrão de Codificação
+
+### Estrutura de Arquivos
+- Use apenas tags de abertura `<?php`
+- Arquivos devem terminar com uma linha em branco
+- Use apenas UTF-8 sem BOM
+
+### Indentação e Espaçamento
+- Use 4 espaços para indentação (não tabs)
+- Linhas não devem ter espaços em branco no final
+- Máximo de 120 caracteres por linha (preferencialmente 80)
+
+### Chaves e Estruturas de Controle
+```php
+// Correto
+if ($condition) {
+    // código
+}
+
+// Correto - métodos de classe
+class Example
+{
+    public function method(): void
+    {
+        // código
+    }
+}
+```
+
+### Declarações de Namespace e Use
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\User;
+use Illuminate\Support\Collection;
+
+class UserService
+{
+    // código
+}
+```
+
+## Clean Code - Código Limpo
+
+### Nomes Significativos
+- Use nomes descritivos e pronunciáveis
+- Evite abreviações e acrônimos
+- Use verbos para funções e substantivos para variáveis
+
+```php
+// ✅ Correto
+public function calculateMonthlyRevenue(): float
+{
+    $activeUsers = $this->getActiveUsers();
+    return $activeUsers->sum('monthly_payment');
+}
+
+// ❌ Incorreto  
+public function calc(): float
+{
+    $u = $this->getUsrs();
+    return $u->sum('mp');
+}
+```
+
+### Funções Pequenas
+- Funções devem fazer apenas uma coisa
+- Máximo de 20 linhas por função (idealmente menos de 10)
+- Use métodos privados para quebrar lógica complexa
+
+### Comentários
+- Código deve ser autoexplicativo
+- Use comentários apenas quando necessário para explicar "por quê", não "o quê"
+- PHPDoc obrigatório para métodos públicos
+
+```php
+/**
+ * Calcula o desconto baseado no histórico de compras do usuário.
+ * 
+ * Aplica desconto progressivo: 5% para 3+ compras, 10% para 10+ compras
+ */
+public function calculateLoyaltyDiscount(User $user): float
+{
+    $purchaseCount = $user->purchases()->count();
+    
+    if ($purchaseCount < 3) {
+        return 0.0;
+    }
+    
+    if ($purchaseCount >= 10) {
+        return 0.10;
+    }
+    
+    return 0.05;
+}
+```
+
+### Tratamento de Erros
+- Use exceptions específicas, não genéricas
+- Falhe rápido com early returns
+- Não retorne null, use Optional patterns ou exceptions
+
+```php
+public function findUser(int $id): User
+{
+    $user = User::find($id);
+    
+    if (!$user) {
+        throw new UserNotFoundException("Usuário com ID {$id} não encontrado");
+    }
+    
+    return $user;
+}
+```
+
+### Princípios SOLID
+- **Single Responsibility**: Uma classe, uma responsabilidade
+- **Open/Closed**: Aberto para extensão, fechado para modificação
+- **Liskov Substitution**: Subtipos devem ser substituíveis por seus tipos base
+- **Interface Segregation**: Muitas interfaces específicas são melhores que uma genérica
+- **Dependency Inversion**: Dependa de abstrações, não de implementações
+
+### Formatação Automática
+- Use Laravel Pint: `vendor/bin/pint --dirty`
+- Configure seu IDE para formatar automaticamente ao salvar
+- Mantenha consistência em todo o projeto
+
+## Padrão CRUD - Estrutura Obrigatória
+
+Para operações CRUD, **SEMPRE** siga esta estrutura:
+
+1. **Form Request** - Validação de entrada
+2. **Controller** - Entrada de dados e coordenação
+3. **Service** - Regras de negócio
+4. **Retorno adequado** - Status codes e dados corretos
+
+### 1. Form Request - Validação
+```php
+<?php
+
+namespace App\Http\Requests\User;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreUserRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'O nome é obrigatório.',
+            'email.unique' => 'Este email já está sendo usado.',
+            'password.min' => 'A senha deve ter pelo menos 8 caracteres.',
+        ];
+    }
+}
+```
+
+### 2. Controller - Entrada e Coordenação (Inertia.js)
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+use App\Services\User\CreateUserService;
+use App\Services\User\UpdateUserService;
+use App\Services\User\DeleteUserService;
+use App\Services\User\GetAllUsersService;
+use App\Services\User\GetUserDetailsService;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
+
+class UserController extends Controller
+{
+    public function __construct(
+        private GetAllUsersService $getAllUsersService,
+        private GetUserDetailsService $getUserDetailsService,
+        private CreateUserService $createUserService,
+        private UpdateUserService $updateUserService,
+        private DeleteUserService $deleteUserService
+    ) {
+    }
+
+    public function index(Request $request): Response
+    {
+        $users = $this->getAllUsersService->execute($request->all());
+
+        return Inertia::render('Users/Index', [
+            'users' => $users,
+            'filters' => $request->only(['search', 'status'])
+        ]);
+    }
+
+    public function show(User $user): Response
+    {
+        $userData = $this->getUserDetailsService->execute($user);
+
+        return Inertia::render('Users/Show', [
+            'user' => $userData
+        ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Users/Create');
+    }
+
+    public function store(StoreUserRequest $request): RedirectResponse
+    {
+        $user = $this->createUserService->execute($request->validated());
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'Usuário criado com sucesso');
+    }
+
+    public function edit(User $user): Response
+    {
+        return Inertia::render('Users/Edit', [
+            'user' => $user
+        ]);
+    }
+
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    {
+        $this->updateUserService->execute($user, $request->validated());
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'Usuário atualizado com sucesso');
+    }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        $this->deleteUserService->execute($user);
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'Usuário excluído com sucesso');
+    }
+}
+```
+
+### 3. Service - Uma Ação por Classe
+
+**IMPORTANTE**: Cada Service deve ter apenas **UMA** ação e ficar organizado por contexto:
+
+```
+app/Services/
+├── User/
+│   ├── CreateUserService.php
+│   ├── UpdateUserService.php
+│   ├── DeleteUserService.php
+│   ├── GetUserDetailsService.php
+│   └── GetAllUsersService.php
+├── Campaign/
+│   ├── CreateCampaignService.php
+│   ├── SendCampaignService.php
+│   └── ScheduleCampaignService.php
+└── Team/
+    ├── CreateTeamService.php
+    └── AddMemberService.php
+```
+
+#### Exemplo: Service de Criação
+```php
+<?php
+
+namespace App\Services\User;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeEmail;
+
+class CreateUserService
+{
+    public function execute(array $data): User
+    {
+        // Aplicar regras de negócio para criação
+        $data['password'] = Hash::make($data['password']);
+        $data['is_active'] = true;
+        
+        $user = User::create($data);
+        
+        // Lógica adicional pós-criação
+        $this->assignDefaultRole($user);
+        $this->sendWelcomeEmail($user);
+        
+        return $user->fresh();
+    }
+
+    private function assignDefaultRole(User $user): void
+    {
+        $user->assignRole('user');
+    }
+
+    private function sendWelcomeEmail(User $user): void
+    {
+        Mail::to($user)->send(new WelcomeEmail($user));
+    }
+}
+```
+
+#### Exemplo: Service de Atualização
+```php
+<?php
+
+namespace App\Services\User;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
+class UpdateUserService
+{
+    public function execute(User $user, array $data): User
+    {
+        // Aplicar regras de negócio para atualização
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
+        $user->update($data);
+        
+        // Lógica adicional pós-atualização
+        $this->logUserUpdate($user);
+        
+        return $user->fresh();
+    }
+
+    private function logUserUpdate(User $user): void
+    {
+        Log::info('User updated', ['user_id' => $user->id]);
+    }
+}
+```
+
+#### Exemplo: Service de Listagem
+```php
+<?php
+
+namespace App\Services\User;
+
+use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+class GetAllUsersService
+{
+    public function execute(array $filters = []): LengthAwarePaginator
+    {
+        $query = User::query();
+
+        if (isset($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if (isset($filters['status'])) {
+            $query->where('is_active', $filters['status'] === 'active');
+        }
+
+        return $query->paginate($filters['per_page'] ?? 15);
+    }
+}
+```
+
+#### Exemplo: Service de Detalhes
+```php
+<?php
+
+namespace App\Services\User;
+
+use App\Models\User;
+
+class GetUserDetailsService
+{
+    public function execute(User $user): User
+    {
+        // Aplicar regras de negócio para exibição
+        $user->load(['teams', 'roles', 'permissions']);
+        
+        // Adicionar dados computados se necessário
+        $user->total_campaigns = $user->campaigns()->count();
+        $user->last_login_formatted = $user->last_login_at?->diffForHumans();
+        
+        return $user;
+    }
+}
+```
+
+#### Exemplo: Service de Exclusão
+```php
+<?php
+
+namespace App\Services\User;
+
+use App\Models\User;
+
+class DeleteUserService
+{
+    public function execute(User $user): bool
+    {
+        // Verificar regras de negócio antes de excluir
+        if ($user->hasActiveSubscriptions()) {
+            throw new \Exception('Não é possível excluir usuário com assinaturas ativas');
+        }
+
+        if ($user->teams()->where('role', 'owner')->exists()) {
+            throw new \Exception('Não é possível excluir usuário que é proprietário de equipes');
+        }
+
+        return $user->delete();
+    }
+}
+```
+
+## Padrão de Retorno Inertia.js
+
+### Respostas de Páginas (GET)
+- **Inertia::render()** - Para renderizar páginas Vue
+- **Dados passados via props** - Sempre tipados e organizados
+- **Filtros e parâmetros** - Repassados para o frontend
+
+### Respostas de Ações (POST/PUT/DELETE)
+- **redirect()->route()** - Redirecionamento após ações
+- **->with('success', 'mensagem')** - Flash messages de sucesso
+- **->with('error', 'mensagem')** - Flash messages de erro
+- **->withErrors()** - Erros de validação (automático via Form Request)
+
+### Exemplo de Tratamento de Erros
+```php
+public function store(StoreUserRequest $request): RedirectResponse
+{
+    try {
+        $user = $this->userService->createUser($request->validated());
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'Usuário criado com sucesso');
+        
+    } catch (\Exception $e) {
+        return redirect()
+            ->back()
+            ->with('error', 'Erro ao criar usuário: ' . $e->getMessage())
+            ->withInput();
+    }
+}
+```
+
+### Estrutura de Dados para o Frontend
+```php
+// ✅ Correto - dados organizados e tipados
+return Inertia::render('Users/Index', [
+    'users' => $users, // LengthAwarePaginator ou Collection
+    'filters' => $request->only(['search', 'status']),
+    'can' => [
+        'create_user' => auth()->user()->can('create', User::class),
+        'edit_user' => auth()->user()->can('update', User::class),
+    ]
+]);
+
+// ❌ Incorreto - dados desorganizados
+return Inertia::render('Users/Index', [
+    'data' => $users,
+    'search' => $request->search,
+    'status' => $request->status,
+    'create' => true,
+    'edit' => true,
+]);
+```
+
+## Exemplos Práticos
+
+### Repository Pattern (Opcional)
+```php
+interface UserRepositoryInterface
+{
+    public function findActiveUsers(): Collection;
+    public function findByEmail(string $email): ?User;
+}
+
+class UserRepository implements UserRepositoryInterface
+{
+    public function findActiveUsers(): Collection
+    {
+        return User::where('is_active', true)->get();
+    }
+    
+    public function findByEmail(string $email): ?User
+    {
+        if (empty($email)) {
+            return null;
+        }
+        
+        return User::where('email', $email)->first();
+    }
+}
+```
+
+### Service Classes Complexos
+```php
+class CampaignService
+{
+    public function __construct(
+        private CampaignRepository $campaignRepository,
+        private EmailService $emailService
+    ) {
+    }
+    
+    public function sendCampaign(Campaign $campaign): bool
+    {
+        if (!$campaign->isReady()) {
+            throw new CampaignNotReadyException();
+        }
+        
+        if ($campaign->isSent()) {
+            return true; // Early return - já enviada
+        }
+        
+        $recipients = $this->getValidRecipients($campaign);
+        
+        if ($recipients->isEmpty()) {
+            throw new NoRecipientsException();
+        }
+        
+        return $this->processCampaignSending($campaign, $recipients);
+    }
+    
+    private function getValidRecipients(Campaign $campaign): Collection
+    {
+        return $campaign->recipients()
+            ->where('is_active', true)
+            ->whereNotNull('email')
+            ->get();
+    }
+    
+    private function processCampaignSending(Campaign $campaign, Collection $recipients): bool
+    {
+        foreach ($recipients as $recipient) {
+            $this->emailService->send($campaign, $recipient);
+        }
+        
+        $campaign->markAsSent();
+        
+        return true;
+    }
+}
+```

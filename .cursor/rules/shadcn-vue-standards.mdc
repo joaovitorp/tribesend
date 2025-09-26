@@ -1,0 +1,507 @@
+---
+description: Padrões para criação de telas usando shadcn-vue + Inertia.js + Vue 3
+globs: ['resources/js/**/*.vue', 'resources/js/**/*.ts']
+alwaysApply: true
+---
+
+# Padrões shadcn-vue + Inertia.js - TribeSend
+
+## Estrutura de Arquivos
+
+### Organização de Diretórios
+```
+resources/js/
+├── components/
+│   ├── ui/              # Componentes shadcn-vue (gerados automaticamente)
+│   ├── [ComponentName].vue  # Componentes específicos da aplicação
+├── layouts/
+│   ├── AppLayout.vue    # Layout principal da aplicação
+│   ├── AuthLayout.vue   # Layout para páginas de autenticação
+│   └── [LayoutName].vue # Outros layouts específicos
+├── pages/
+│   ├── [PageName].vue   # Páginas Inertia.js (PascalCase)
+│   └── [module]/        # Páginas agrupadas por módulo
+├── composables/         # Composables Vue 3
+├── lib/
+│   └── utils.ts        # Utilitários shadcn-vue
+└── types/              # Definições TypeScript
+```
+
+## Instalação de Componentes shadcn-vue
+
+### Comando Padrão
+```bash
+npx shadcn-vue@latest add [nome-do-componente]
+```
+
+### Componentes Mais Utilizados
+- `button` - Botões padronizados
+- `card` - Cards e containers
+- `input` - Campos de entrada
+- `dialog` - Modais e diálogos
+- `sheet` - Painéis laterais
+- `badge` - Badges e tags
+- `avatar` - Avatares de usuários
+- `dropdown-menu` - Menus dropdown
+- `skeleton` - Estados de carregamento
+- `alert` - Alertas e notificações
+
+## Padrão de Páginas Inertia.js
+
+### Estrutura Básica de Página
+```vue
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head } from '@inertiajs/vue3';
+import type { BreadcrumbItemType } from '@/types';
+
+// Props da página (dados do backend)
+interface Props {
+    // Definir props tipadas aqui
+}
+
+const props = defineProps<Props>();
+
+// Breadcrumbs para navegação
+const breadcrumbs: BreadcrumbItemType[] = [
+    {
+        title: 'Nome da Página',
+        href: '#', // Use rotas nomeadas quando possível
+    },
+];
+</script>
+
+<template>
+    <Head title="Título da Página" />
+
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <!-- Conteúdo da página -->
+        <div class="flex h-full flex-1 flex-col gap-4 p-4">
+            <!-- Seu conteúdo aqui -->
+        </div>
+    </AppLayout>
+</template>
+```
+
+### Páginas com Formulários
+```vue
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface Props {
+    // Props do formulário
+}
+
+const props = defineProps<Props>();
+
+const form = useForm({
+    // Campos do formulário
+});
+
+const submit = () => {
+    form.post(route('route.name'), {
+        onSuccess: () => {
+            // Ação após sucesso
+        },
+    });
+};
+</script>
+
+<template>
+    <Head title="Formulário" />
+
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="flex h-full flex-1 flex-col gap-4 p-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Título do Formulário</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form @submit.prevent="submit" class="space-y-4">
+                        <div class="space-y-2">
+                            <Label for="field">Campo</Label>
+                            <Input
+                                id="field"
+                                v-model="form.field"
+                                :class="{ 'border-destructive': form.errors.field }"
+                            />
+                            <p v-if="form.errors.field" class="text-sm text-destructive">
+                                {{ form.errors.field }}
+                            </p>
+                        </div>
+                        
+                        <Button type="submit" :disabled="form.processing">
+                            {{ form.processing ? 'Salvando...' : 'Salvar' }}
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
+    </AppLayout>
+</template>
+```
+
+## Padrões de Componentes
+
+### Componentes de UI Personalizados
+- Sempre criar em `components/` (não em `components/ui/`)
+- Usar PascalCase para nomes de arquivos
+- Seguir composição com shadcn-vue components
+
+```vue
+<script setup lang="ts">
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface Props {
+    title: string;
+    description?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    description: '',
+});
+
+const emit = defineEmits<{
+    action: [id: string];
+}>();
+</script>
+
+<template>
+    <Card>
+        <CardHeader>
+            <CardTitle>{{ title }}</CardTitle>
+            <p v-if="description" class="text-muted-foreground">
+                {{ description }}
+            </p>
+        </CardHeader>
+        <CardContent>
+            <slot />
+            <div class="mt-4 flex justify-end">
+                <Button @click="emit('action', 'example')">
+                    Ação
+                </Button>
+            </div>
+        </CardContent>
+    </Card>
+</template>
+```
+
+## Padrões de Layout
+
+### Layout Principal (AppLayout.vue)
+- Sempre usar breadcrumbs quando apropriado
+- Manter consistência na estrutura
+- Usar slots para flexibilidade
+
+### Layout de Autenticação (AuthLayout.vue)
+- Para páginas de login, registro, recuperação de senha
+- Centralizado e responsivo
+- Sem sidebar ou navegação principal
+
+## Padrões de Estilização
+
+### Classes Tailwind Recomendadas
+- Use `gap-4` para espaçamentos consistentes
+- `flex-1` para elementos que devem ocupar espaço disponível
+- `rounded-xl` para bordas arredondadas
+- `border-sidebar-border/70` para bordas consistentes
+- Classes dark mode: `dark:border-sidebar-border`
+
+### Responsividade
+- Mobile-first: classes base para mobile
+- Breakpoints: `md:`, `lg:`, `xl:` conforme necessário
+- Grid responsivo: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
+
+## Estados de Interface
+
+### Loading States
+```vue
+<template>
+    <!-- Use Skeleton do shadcn-vue -->
+    <div v-if="loading" class="space-y-4">
+        <Skeleton class="h-4 w-full" />
+        <Skeleton class="h-4 w-3/4" />
+        <Skeleton class="h-4 w-1/2" />
+    </div>
+    
+    <div v-else>
+        <!-- Conteúdo carregado -->
+    </div>
+</template>
+```
+
+### Empty States
+```vue
+<template>
+    <div v-if="items.length === 0" class="flex flex-col items-center justify-center py-12">
+        <div class="text-center">
+            <h3 class="text-lg font-semibold">Nenhum item encontrado</h3>
+            <p class="text-muted-foreground">
+                Comece criando seu primeiro item.
+            </p>
+            <Button class="mt-4" @click="createNew">
+                Criar Novo
+            </Button>
+        </div>
+    </div>
+</template>
+```
+
+### Error States
+```vue
+<template>
+    <Alert v-if="error" variant="destructive">
+        <AlertCircle class="h-4 w-4" />
+        <AlertTitle>Erro</AlertTitle>
+        <AlertDescription>
+            {{ error }}
+        </AlertDescription>
+    </Alert>
+</template>
+```
+
+## Navegação e Roteamento
+
+### Links Inertia.js
+```vue
+<script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
+</script>
+
+<template>
+    <!-- Para navegação interna -->
+    <Link href="/dashboard" class="text-primary hover:underline">
+        Dashboard
+    </Link>
+    
+    <!-- Com rotas nomeadas (recomendado) -->
+    <Link :href="route('dashboard')" class="text-primary hover:underline">
+        Dashboard
+    </Link>
+</template>
+```
+
+### Botões de Ação
+```vue
+<script setup lang="ts">
+import { router } from '@inertiajs/vue3';
+
+const handleAction = () => {
+    router.post(route('action.store'), data, {
+        onSuccess: () => {
+            // Sucesso
+        },
+        onError: () => {
+            // Erro
+        },
+    });
+};
+</script>
+```
+
+## TypeScript e Tipagem
+
+### Props Interface
+```typescript
+interface Props {
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    };
+    items?: Array<{
+        id: number;
+        title: string;
+        status: 'active' | 'inactive';
+    }>;
+}
+```
+
+### Composables Tipados
+```typescript
+// composables/useApi.ts
+export function useApi() {
+    const loading = ref(false);
+    const error = ref<string | null>(null);
+    
+    const fetchData = async <T>(url: string): Promise<T | null> => {
+        // Implementação
+    };
+    
+    return {
+        loading: readonly(loading),
+        error: readonly(error),
+        fetchData,
+    };
+}
+```
+
+## Testes
+
+### Testes de Componente (Pest + Browser)
+```php
+it('renders the component correctly', function () {
+    $this->actingAs(User::factory()->create());
+    
+    $page = visit('/page-url');
+    
+    $page->assertSee('Expected Text')
+         ->assertNoJavascriptErrors();
+});
+```
+
+## Checklist de Criação de Páginas
+
+### Antes de Criar
+- [ ] Verificar se existe componente shadcn-vue similar
+- [ ] Definir layout apropriado (App, Auth, etc.)
+- [ ] Planejar breadcrumbs e navegação
+- [ ] Definir props TypeScript
+
+### Durante o Desenvolvimento
+- [ ] Usar componentes shadcn-vue existentes
+- [ ] Implementar estados (loading, error, empty)
+- [ ] Adicionar validação de formulários
+- [ ] Garantir responsividade
+- [ ] Implementar dark mode se necessário
+
+### Após Criação
+- [ ] Testar em diferentes dispositivos
+- [ ] Verificar acessibilidade básica
+- [ ] Executar testes automatizados
+- [ ] Validar integração com backend
+
+## Comandos Úteis
+
+```bash
+# Adicionar componente shadcn-vue
+npx shadcn-vue@latest add button
+
+# Executar testes
+php artisan test
+
+# Executar linter
+npm run lint
+
+# Build para produção
+npm run build
+```
+
+## Exemplo Completo: Página de Listagem
+
+```vue
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { BreadcrumbItemType } from '@/types';
+
+interface Item {
+    id: number;
+    title: string;
+    status: 'active' | 'inactive';
+    created_at: string;
+}
+
+interface Props {
+    items: Item[];
+    loading?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    loading: false,
+});
+
+const breadcrumbs: BreadcrumbItemType[] = [
+    { title: 'Items', href: route('items.index') },
+];
+
+const deleteItem = (id: number) => {
+    if (confirm('Tem certeza que deseja excluir?')) {
+        router.delete(route('items.destroy', id));
+    }
+};
+</script>
+
+<template>
+    <Head title="Items" />
+
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="flex h-full flex-1 flex-col gap-4 p-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-semibold">Items</h1>
+                <Button as-child>
+                    <Link :href="route('items.create')">
+                        Criar Item
+                    </Link>
+                </Button>
+            </div>
+
+            <!-- Loading State -->
+            <div v-if="loading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card v-for="i in 6" :key="i">
+                    <CardHeader>
+                        <Skeleton class="h-4 w-3/4" />
+                        <Skeleton class="h-3 w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                        <Skeleton class="h-8 w-20" />
+                    </CardContent>
+                </Card>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else-if="items.length === 0" class="flex flex-col items-center justify-center py-12">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold">Nenhum item encontrado</h3>
+                    <p class="text-muted-foreground">
+                        Comece criando seu primeiro item.
+                    </p>
+                    <Button class="mt-4" as-child>
+                        <Link :href="route('items.create')">
+                            Criar Primeiro Item
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+
+            <!-- Items Grid -->
+            <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card v-for="item in items" :key="item.id">
+                    <CardHeader>
+                        <CardTitle>{{ item.title }}</CardTitle>
+                        <Badge :variant="item.status === 'active' ? 'default' : 'secondary'">
+                            {{ item.status }}
+                        </Badge>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="flex justify-between">
+                            <Button variant="outline" size="sm" as-child>
+                                <Link :href="route('items.edit', item.id)">
+                                    Editar
+                                </Link>
+                            </Button>
+                            <Button 
+                                variant="destructive" 
+                                size="sm"
+                                @click="deleteItem(item.id)"
+                            >
+                                Excluir
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    </AppLayout>
+</template>
+```

@@ -15,6 +15,35 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->string('logo')->nullable();
+            $table->string('domain')->nullable();
+            $table->string('subdomain')->nullable();
+            $table->string('timezone')->nullable();
+            $table->string('currency')->nullable();
+            $table->string('language')->nullable();
+            $table->enum('category', [
+                'AI',
+                'Developer',
+                'Marketing',
+                'Game Development',
+                'Journalist',
+                'Writer',
+                'Travel',
+                'E-commerce',
+                'Finance',
+                'Healthcare',
+                'Education',
+                'Consulting',
+                'Design',
+                'Photography',
+                'Music',
+                'Sports',
+                'Food & Beverage',
+                'Real Estate',
+                'Legal',
+                'Non-profit',
+                'Other'
+            ])->nullable();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
