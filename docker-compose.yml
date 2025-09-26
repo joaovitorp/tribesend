@@ -2,99 +2,70 @@ services:
   app:
     build:
       context: .
-      dockerfile: ./docker/frankenphp/Dockerfile
+      dockerfile: docker/api/Dockerfile
     container_name: tribesend_app
-    restart: unless-stopped
-    working_dir: /app
     volumes:
-      - .:/app
-      - ./docker/frankenphp/php.ini:/usr/local/etc/php/conf.d/custom.ini
-    environment:
-      - SERVER_NAME=:80
-      - FRANKENPHP_CONFIG=worker ./public/index.php
-    networks:
-      - tribesend
+      - .:/var/www/app
+      - ./docker/api/php/extra-php.ini:/usr/local/etc/php/conf.d/99_extra.ini
+    ports:
+      - "8000:80"
+      - "5173:5173"
     depends_on:
       - pgsql
       - redis
-      - mailpit
-
-  nginx:
-    image: nginx:alpine
-    container_name: tribesend_nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - .:/app
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/nginx/sites/:/etc/nginx/conf.d/
-      - ./docker/nginx/ssl:/etc/nginx/ssl
     networks:
-      - tribesend
-    depends_on:
-      - app
+      - tribesend_network
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=pgsql
+      - DB_PORT=5432
+      - DB_DATABASE=tribesend
+      - DB_USERNAME=tribesend
+      - DB_PASSWORD=password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailtip
+      - MAIL_PORT=1025
+      - MAIL_USERNAME=null
+      - MAIL_PASSWORD=null
+      - MAIL_ENCRYPTION=null
 
   pgsql:
     image: postgres:16-alpine
     container_name: tribesend_pgsql
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_DB: tribesend
       POSTGRES_USER: tribesend
       POSTGRES_PASSWORD: password
     volumes:
       - pgsql_data:/var/lib/postgresql/data
-      - ./docker/pgsql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
     networks:
-      - tribesend
+      - tribesend_network
 
   redis:
     image: redis:7-alpine
     container_name: tribesend_redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
+    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
-      - ./docker/redis/redis.conf:/etc/redis/redis.conf
-    command: redis-server /etc/redis/redis.conf
-    networks:
-      - tribesend
-
-  mailpit:
-    image: axllent/mailpit:latest
-    container_name: tribesend_mailpit
-    restart: unless-stopped
     ports:
-      - "1025:1025"
-      - "8025:8025"
-    environment:
-      MP_SMTP_AUTH_ACCEPT_ANY: 1
-      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+      - "6379:6379"
     networks:
-      - tribesend
+      - tribesend_network
 
-  queue:
-    build:
-      context: .
-      dockerfile: ./docker/frankenphp/Dockerfile
-    container_name: tribesend_queue
-    restart: unless-stopped
-    working_dir: /app
-    volumes:
-      - .:/app
-      - ./docker/frankenphp/php.ini:/usr/local/etc/php/conf.d/custom.ini
-    command: php artisan queue:work --verbose --tries=3 --timeout=90
+  mailtip:
+    image: mailhog/mailhog:latest
+    container_name: tribesend_mailtip
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
     networks:
-      - tribesend
-    depends_on:
-      - pgsql
-      - redis
-      - mailpit
+      - tribesend_network
 
 volumes:
   pgsql_data:
@@ -103,5 +74,5 @@ volumes:
     driver: local
 
 networks:
-  tribesend:
+  tribesend_network:
     driver: bridge
