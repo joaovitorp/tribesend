@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('teams', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('logo')->nullable();
@@ -42,9 +42,10 @@ return new class extends Migration
                 'Real Estate',
                 'Legal',
                 'Non-profit',
-                'Other'
+                'Other',
             ])->nullable();
-            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->uuid('owner_id');
+            $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

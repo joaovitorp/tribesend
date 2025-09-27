@@ -12,13 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subscriber_groups', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('team_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('team_id');
             $table->string('name');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
             $table->index(['team_id', 'is_active']);
         });
     }

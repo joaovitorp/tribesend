@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subscriptions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('team_id')->constrained()->onDelete('cascade');
-            $table->foreignId('plan_id')->constrained()->onDelete('restrict');
+            $table->uuid('id')->primary();
+            $table->uuid('team_id');
+            $table->uuid('plan_id');
             $table->enum('status', ['active', 'canceled', 'expired', 'past_due'])->default('active');
             $table->string('provider')->nullable(); // stripe, paypal, etc
             $table->string('provider_subscription_id')->nullable();
@@ -25,6 +25,8 @@ return new class extends Migration
             $table->timestamp('canceled_at')->nullable();
             $table->timestamps();
 
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
+            $table->foreign('plan_id')->references('id')->on('plans')->onDelete('restrict');
             $table->index(['team_id', 'status']);
         });
     }

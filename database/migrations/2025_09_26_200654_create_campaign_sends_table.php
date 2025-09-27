@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('campaign_sends', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('campaign_id')->constrained()->onDelete('cascade');
-            $table->foreignId('subscriber_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('campaign_id');
+            $table->uuid('subscriber_id');
             $table->enum('status', ['pending', 'sent', 'failed', 'bounced'])->default('pending');
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('opened_at')->nullable();
@@ -25,6 +25,8 @@ return new class extends Migration
             $table->json('tracking_data')->nullable(); // dados adicionais de tracking
             $table->timestamps();
 
+            $table->foreign('campaign_id')->references('id')->on('campaigns')->onDelete('cascade');
+            $table->foreign('subscriber_id')->references('id')->on('subscribers')->onDelete('cascade');
             $table->unique(['campaign_id', 'subscriber_id']);
             $table->index(['campaign_id', 'status']);
             $table->index(['subscriber_id']);

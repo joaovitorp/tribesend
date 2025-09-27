@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureUserHasNoTeam;
+use App\Http\Middleware\EnsureUserHasTeam;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -20,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+        ]);
+
+        $middleware->alias([
+            'user.has.no.team' => EnsureUserHasNoTeam::class,
+            'user.has.team' => EnsureUserHasTeam::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

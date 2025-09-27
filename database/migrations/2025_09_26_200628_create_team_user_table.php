@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('team_user', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('team_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('role', ['member', 'admin'])->default('member');
+            $table->uuid('id')->primary();
+            $table->uuid('team_id');
+            $table->uuid('user_id');
+            $table->enum('role', ['member', 'admin', 'owner'])->default('member');
             $table->timestamps();
 
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->unique(['team_id', 'user_id']);
         });
     }

@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('campaigns', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('team_id')->constrained()->onDelete('cascade');
-            $table->foreignId('subscriber_group_id')->nullable()->constrained()->onDelete('set null');
+            $table->uuid('id')->primary();
+            $table->uuid('team_id');
+            $table->uuid('subscriber_group_id')->nullable();
             $table->string('name');
             $table->string('subject');
             $table->text('body_html');
@@ -30,6 +30,8 @@ return new class extends Migration
             $table->integer('complained_count')->default(0);
             $table->timestamps();
 
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
+            $table->foreign('subscriber_group_id')->references('id')->on('subscriber_groups')->onDelete('set null');
             $table->index(['team_id', 'status']);
             $table->index(['scheduled_at']);
         });

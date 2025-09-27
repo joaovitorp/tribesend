@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subscribers', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('team_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('team_id');
             $table->string('email')->index();
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
@@ -23,6 +23,7 @@ return new class extends Migration
             $table->json('metadata')->nullable(); // campos customizados
             $table->timestamps();
 
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
             $table->unique(['team_id', 'email']);
             $table->index(['team_id', 'status']);
         });
