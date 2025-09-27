@@ -1,0 +1,895 @@
+# Padrões shadcn-vue + Inertia.js - TribeSend
+
+## Sistema de Rotas Wayfinder
+
+### Importação de Rotas
+O projeto usa o Laravel Wayfinder que gera automaticamente funções tipadas para todas as rotas. **NUNCA use a função `route()` global**. Sempre importe as rotas específicas:
+
+```typescript
+// ✅ Correto - Importar rotas específicas
+import { dashboard } from '@/routes';
+import { index as formsIndex, create as formsCreate, show as formsShow } from '@/routes/forms';
+import { login, register } from '@/routes';
+
+// ❌ Incorreto - Não usar route() global
+// route('forms.index') - NÃO FAZER ISSO
+```
+
+### Padrões de Uso
+```typescript
+// Para rotas simples (sem parâmetros)
+const dashboardUrl = dashboard().url;
+
+// Para rotas com parâmetros
+const formUrl = formsShow({ form: formId }).url;
+
+// Para formulários Inertia
+form.post(formsStore().url, data);
+
+// Para router do Inertia
+router.delete(formsDestroy({ form: formId }).url);
+```
+
+### Estrutura das Rotas Geradas
+Cada rota possui:
+- `.url` - URL da rota
+- `.method` - Método HTTP
+- `.definition` - Definição completa da rota
+- `.form` - Versão para formulários HTML
+
+### Padrões de Importação por Módulo
+```typescript
+// Rotas principais (dashboard, login, etc.)
+import { dashboard, login, register, logout } from '@/routes';
+
+// Rotas de formulários
+import { 
+    index as formsIndex, 
+    create as formsCreate, 
+    store as formsStore,
+    show as formsShow,
+    edit as formsEdit,
+    update as formsUpdate,
+    destroy as formsDestroy 
+} from '@/routes/forms';
+
+// Rotas públicas de formulários
+import { 
+    show as publicFormShow, 
+    subscribe as publicFormSubscribe,
+    success as publicFormSuccess 
+} from '@/routes/public';
+
+// Sempre usar alias descritivos para evitar conflitos
+import { index as usersIndex } from '@/routes/users';
+import { index as teamsIndex } from '@/routes/teams';
+```
+
+### Exemplos Práticos de Uso
+```typescript
+// Navegação simples
+const goToDashboard = () => router.visit(dashboard().url);
+
+// Navegação com parâmetros
+const viewForm = (formId: string) => router.visit(formsShow({ form: formId }).url);
+
+// Formulários POST/PUT/DELETE
+const createForm = (data: FormData) => {
+    form.post(formsStore().url, {
+        onSuccess: () => router.visit(formsIndex().url)
+    });
+};
+
+const updateForm = (formId: string, data: FormData) => {
+    form.put(formsUpdate({ form: formId }).url, {
+        onSuccess: () => router.visit(formsShow({ form: formId }).url)
+    });
+};
+
+const deleteForm = (formId: string) => {
+    router.delete(formsDestroy({ form: formId }).url, {
+        onSuccess: () => router.visit(formsIndex().url)
+    });
+};
+```
+
+### ❌ Erros Comuns a Evitar
+```typescript
+// ❌ NUNCA usar route() global
+const url = route('forms.index');
+const url = route('forms.show', { form: id });
+
+// ❌ NUNCA usar URLs hardcoded
+const url = '/forms';
+const url = `/forms/${id}`;
+
+// ❌ NUNCA importar sem alias quando há conflito
+import { index } from '@/routes/forms';
+import { index } from '@/routes/users'; // Conflito!
+
+// ❌ NUNCA usar .definition diretamente para navegação
+router.visit(formsIndex.definition.url); // Sem parâmetros!
+```
+
+### ✅ Boas Práticas
+```typescript
+// ✅ Sempre importar com alias descritivos
+import { index as formsIndex } from '@/routes/forms';
+import { index as usersIndex } from '@/routes/users';
+
+// ✅ Sempre usar .url para obter a URL final
+const url = formsIndex().url;
+const url = formsShow({ form: id }).url;
+
+// ✅ Agrupar importações por contexto
+import { dashboard } from '@/routes';
+import { 
+    index as formsIndex, 
+    create as formsCreate,
+    show as formsShow 
+} from '@/routes/forms';
+
+// ✅ Usar tipos TypeScript para parâmetros
+interface FormParams {
+    form: string | number;
+}
+const url = formsShow({ form: formId } as FormParams).url;
+```
+
+## Estrutura de Arquivos
+
+### Organização de Diretórios
+```
+resources/js/
+├── components/
+│   ├── ui/              # Componentes shadcn-vue (gerados automaticamente)
+│   ├── [ComponentName].vue  # Componentes específicos da aplicação
+├── layouts/
+│   ├── AppLayout.vue    # Layout principal da aplicação
+│   ├── AuthLayout.vue   # Layout para páginas de autenticação
+│   └── [LayoutName].vue # Outros layouts específicos
+├── pages/
+│   ├── [PageName].vue   # Páginas Inertia.js (PascalCase)
+│   └── [module]/        # Páginas agrupadas por módulo
+├── composables/         # Composables Vue 3
+├── lib/
+│   └── utils.ts        # Utilitários shadcn-vue
+└── types/              # Definições TypeScript
+```
+
+## Instalação de Componentes shadcn-vue
+
+### Comando Padrão
+```bash
+npx shadcn-vue@latest add [nome-do-componente]
+```
+
+### Componentes Mais Utilizados
+- `button` - Botões padronizados
+- `card` - Cards e containers
+- `input` - Campos de entrada
+- `dialog` - Modais e diálogos
+- `sheet` - Painéis laterais
+- `badge` - Badges e tags
+- `avatar` - Avatares de usuários
+- `dropdown-menu` - Menus dropdown
+- `skeleton` - Estados de carregamento
+- `alert` - Alertas e notificações
+- `alert-dialog` - **Confirmações e ações destrutivas**
+
+## Confirmações e Ações Destrutivas
+
+### ⚠️ OBRIGATÓRIO: Use Alert Dialog para Confirmações
+
+**NUNCA use `window.confirm()`, `window.alert()` ou alerts nativos do browser.** Sempre utilize o componente `AlertDialog` do shadcn-vue para qualquer ação que precise de confirmação.
+
+### Instalação do Alert Dialog
+```bash
+npx shadcn-vue@latest add alert-dialog
+```
+
+### Padrão Obrigatório para Confirmações
+```vue
+<script setup lang="ts">
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-vue-next';
+import { router } from '@inertiajs/vue3';
+
+// Importar rotas necessárias
+import { destroy as itemsDestroy } from '@/routes/items';
+
+interface Item {
+    id: string;
+    name: string;
+}
+
+const deleteItem = (item: Item) => {
+    router.delete(itemsDestroy({ item: item.id }).url);
+};
+</script>
+
+<template>
+    <AlertDialog>
+        <AlertDialogTrigger as-child>
+            <Button variant="destructive" size="sm">
+                <Trash2 class="h-3 w-3" />
+                Excluir
+            </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Tem certeza que deseja excluir "{{ item.name }}"?
+                    Esta ação não pode ser desfeita.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction @click="deleteItem(item)">
+                    Excluir
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+</template>
+```
+
+### Casos de Uso Obrigatórios
+Use Alert Dialog para:
+- ✅ **Exclusões** (delete/destroy)
+- ✅ **Ações irreversíveis** (arquivar, desativar permanentemente)
+- ✅ **Alterações críticas** (mudança de status importante)
+- ✅ **Perda de dados** (sair sem salvar, resetar formulário)
+- ✅ **Ações financeiras** (cancelar assinatura, processar pagamento)
+
+### ❌ Nunca Faça Isso
+```vue
+<!-- ❌ PROIBIDO - Alerts nativos -->
+<script>
+const deleteItem = (item) => {
+    if (confirm(`Excluir ${item.name}?`)) {
+        // ação
+    }
+};
+
+const showAlert = () => {
+    alert('Mensagem');
+};
+
+const showPrompt = () => {
+    const result = prompt('Digite algo:');
+};
+</script>
+```
+
+### ✅ Sempre Faça Assim
+```vue
+<!-- ✅ CORRETO - Alert Dialog -->
+<AlertDialog>
+    <AlertDialogTrigger as-child>
+        <Button variant="destructive">Excluir</Button>
+    </AlertDialogTrigger>
+    <AlertDialogContent>
+        <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar ação</AlertDialogTitle>
+            <AlertDialogDescription>
+                Descrição clara da ação e suas consequências.
+            </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction @click="executeAction">
+                Confirmar
+            </AlertDialogAction>
+        </AlertDialogFooter>
+    </AlertDialogContent>
+</AlertDialog>
+```
+
+### Variações de Mensagens
+```vue
+<!-- Para exclusões -->
+<AlertDialogDescription>
+    Tem certeza que deseja excluir "{{ item.name }}"?
+    Esta ação não pode ser desfeita.
+</AlertDialogDescription>
+
+<!-- Para desativações -->
+<AlertDialogDescription>
+    Tem certeza que deseja desativar "{{ item.name }}"?
+    Isso impedirá que seja usado até ser reativado.
+</AlertDialogDescription>
+
+<!-- Para ações financeiras -->
+<AlertDialogDescription>
+    Tem certeza que deseja cancelar sua assinatura?
+    Você perderá acesso aos recursos premium imediatamente.
+</AlertDialogDescription>
+
+<!-- Para perda de dados -->
+<AlertDialogDescription>
+    Você tem alterações não salvas. 
+    Tem certeza que deseja sair sem salvar?
+</AlertDialogDescription>
+```
+
+### Botões de Ação Personalizados
+```vue
+<!-- Botão de exclusão vermelho -->
+<AlertDialogAction 
+    @click="deleteItem(item)"
+    class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+>
+    Excluir
+</AlertDialogAction>
+
+<!-- Botão de confirmação padrão -->
+<AlertDialogAction @click="confirmAction">
+    Confirmar
+</AlertDialogAction>
+
+<!-- Botão personalizado -->
+<AlertDialogAction 
+    @click="processPayment"
+    class="bg-green-600 text-white hover:bg-green-700"
+>
+    Processar Pagamento
+</AlertDialogAction>
+```
+
+## Padrão de Páginas Inertia.js
+
+### Estrutura Básica de Página
+```vue
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head } from '@inertiajs/vue3';
+import type { BreadcrumbItemType } from '@/types';
+
+// Props da página (dados do backend)
+interface Props {
+    // Definir props tipadas aqui
+}
+
+const props = defineProps<Props>();
+
+// Importar rotas necessárias
+import { dashboard } from '@/routes';
+import { index as itemsIndex } from '@/routes/items'; // Exemplo
+
+// Breadcrumbs para navegação
+const breadcrumbs: BreadcrumbItemType[] = [
+    {
+        title: 'Dashboard',
+        href: dashboard().url,
+    },
+    {
+        title: 'Nome da Página',
+        href: itemsIndex().url,
+    },
+];
+</script>
+
+<template>
+    <Head title="Título da Página" />
+
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <!-- Conteúdo da página -->
+        <div class="flex h-full flex-1 flex-col gap-4 p-4">
+            <!-- Seu conteúdo aqui -->
+        </div>
+    </AppLayout>
+</template>
+```
+
+### Páginas com Formulários
+```vue
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// Importar rotas necessárias
+import { store as itemsStore, index as itemsIndex } from '@/routes/items';
+
+interface Props {
+    // Props do formulário
+}
+
+const props = defineProps<Props>();
+
+const form = useForm({
+    // Campos do formulário
+});
+
+const submit = () => {
+    form.post(itemsStore().url, {
+        onSuccess: () => {
+            // Redirecionar para lista após sucesso
+            router.visit(itemsIndex().url);
+        },
+    });
+};
+</script>
+
+<template>
+    <Head title="Formulário" />
+
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="flex h-full flex-1 flex-col gap-4 p-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Título do Formulário</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form @submit.prevent="submit" class="space-y-4">
+                        <div class="space-y-2">
+                            <Label for="field">Campo</Label>
+                            <Input
+                                id="field"
+                                v-model="form.field"
+                                :class="{ 'border-destructive': form.errors.field }"
+                            />
+                            <p v-if="form.errors.field" class="text-sm text-destructive">
+                                {{ form.errors.field }}
+                            </p>
+                        </div>
+                        
+                        <Button type="submit" :disabled="form.processing">
+                            {{ form.processing ? 'Salvando...' : 'Salvar' }}
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
+    </AppLayout>
+</template>
+```
+
+## Padrões de Componentes
+
+### Componentes de UI Personalizados
+- Sempre criar em `components/` (não em `components/ui/`)
+- Usar PascalCase para nomes de arquivos
+- Seguir composição com shadcn-vue components
+
+```vue
+<script setup lang="ts">
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface Props {
+    title: string;
+    description?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    description: '',
+});
+
+const emit = defineEmits<{
+    action: [id: string];
+}>();
+</script>
+
+<template>
+    <Card>
+        <CardHeader>
+            <CardTitle>{{ title }}</CardTitle>
+            <p v-if="description" class="text-muted-foreground">
+                {{ description }}
+            </p>
+        </CardHeader>
+        <CardContent>
+            <slot />
+            <div class="mt-4 flex justify-end">
+                <Button @click="emit('action', 'example')">
+                    Ação
+                </Button>
+            </div>
+        </CardContent>
+    </Card>
+</template>
+```
+
+## Padrões de Layout
+
+### Layout Principal (AppLayout.vue)
+- Sempre usar breadcrumbs quando apropriado
+- Manter consistência na estrutura
+- Usar slots para flexibilidade
+
+### Layout de Autenticação (AuthLayout.vue)
+- Para páginas de login, registro, recuperação de senha
+- Centralizado e responsivo
+- Sem sidebar ou navegação principal
+
+## Padrões de Estilização
+
+### Classes Tailwind Recomendadas
+- Use `gap-4` para espaçamentos consistentes
+- `flex-1` para elementos que devem ocupar espaço disponível
+- `rounded-xl` para bordas arredondadas
+- `border-sidebar-border/70` para bordas consistentes
+- Classes dark mode: `dark:border-sidebar-border`
+
+### Responsividade
+- Mobile-first: classes base para mobile
+- Breakpoints: `md:`, `lg:`, `xl:` conforme necessário
+- Grid responsivo: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
+
+## Estados de Interface
+
+### Loading States
+```vue
+<template>
+    <!-- Use Skeleton do shadcn-vue -->
+    <div v-if="loading" class="space-y-4">
+        <Skeleton class="h-4 w-full" />
+        <Skeleton class="h-4 w-3/4" />
+        <Skeleton class="h-4 w-1/2" />
+    </div>
+    
+    <div v-else>
+        <!-- Conteúdo carregado -->
+    </div>
+</template>
+```
+
+### Empty States
+```vue
+<template>
+    <div v-if="items.length === 0" class="flex flex-col items-center justify-center py-12">
+        <div class="text-center">
+            <h3 class="text-lg font-semibold">Nenhum item encontrado</h3>
+            <p class="text-muted-foreground">
+                Comece criando seu primeiro item.
+            </p>
+            <Button class="mt-4" @click="createNew">
+                Criar Novo
+            </Button>
+        </div>
+    </div>
+</template>
+```
+
+### Error States
+```vue
+<template>
+    <Alert v-if="error" variant="destructive">
+        <AlertCircle class="h-4 w-4" />
+        <AlertTitle>Erro</AlertTitle>
+        <AlertDescription>
+            {{ error }}
+        </AlertDescription>
+    </Alert>
+</template>
+```
+
+## Navegação e Roteamento
+
+### Links Inertia.js
+```vue
+<script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
+// Importar rotas necessárias
+import { dashboard } from '@/routes';
+import { index as formsIndex } from '@/routes/forms';
+</script>
+
+<template>
+    <!-- ❌ Evitar URLs hardcoded -->
+    <!-- <Link href="/dashboard">Dashboard</Link> -->
+    
+    <!-- ✅ Usar rotas do wayfinder -->
+    <Link :href="dashboard().url" class="text-primary hover:underline">
+        Dashboard
+    </Link>
+    
+    <Link :href="formsIndex().url" class="text-primary hover:underline">
+        Formulários
+    </Link>
+</template>
+```
+
+### Botões de Ação
+```vue
+<script setup lang="ts">
+import { router } from '@inertiajs/vue3';
+// Importar rotas necessárias
+import { store as actionsStore, index as actionsIndex } from '@/routes/actions';
+
+const handleAction = () => {
+    router.post(actionsStore().url, data, {
+        onSuccess: () => {
+            // Redirecionar para lista após sucesso
+            router.visit(actionsIndex().url);
+        },
+        onError: () => {
+            // Tratar erro
+        },
+    });
+};
+</script>
+```
+
+## TypeScript e Tipagem
+
+### Props Interface
+```typescript
+interface Props {
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    };
+    items?: Array<{
+        id: number;
+        title: string;
+        status: 'active' | 'inactive';
+    }>;
+}
+```
+
+### Composables Tipados
+```typescript
+// composables/useApi.ts
+export function useApi() {
+    const loading = ref(false);
+    const error = ref<string | null>(null);
+    
+    const fetchData = async <T>(url: string): Promise<T | null> => {
+        // Implementação
+    };
+    
+    return {
+        loading: readonly(loading),
+        error: readonly(error),
+        fetchData,
+    };
+}
+```
+
+## Testes
+
+### Testes de Componente (Pest + Browser)
+```php
+it('renders the component correctly', function () {
+    $this->actingAs(User::factory()->create());
+    
+    $page = visit('/page-url');
+    
+    $page->assertSee('Expected Text')
+         ->assertNoJavascriptErrors();
+});
+```
+
+## Checklist de Criação de Páginas
+
+### Antes de Criar
+- [ ] Verificar se existe componente shadcn-vue similar
+- [ ] Definir layout apropriado (App, Auth, etc.)
+- [ ] Planejar breadcrumbs e navegação
+- [ ] Definir props TypeScript
+- [ ] **Identificar rotas necessárias e seus aliases**
+- [ ] **Verificar se as rotas existem em `resources/js/routes/`**
+- [ ] **Identificar ações que precisam de confirmação (Alert Dialog)**
+
+### Durante o Desenvolvimento
+- [ ] Usar componentes shadcn-vue existentes
+- [ ] Implementar estados (loading, error, empty)
+- [ ] Adicionar validação de formulários
+- [ ] Garantir responsividade
+- [ ] Implementar dark mode se necessário
+- [ ] **Importar rotas com aliases descritivos**
+- [ ] **NUNCA usar `route()` global ou URLs hardcoded**
+- [ ] **Usar `.url` para todas as navegações**
+- [ ] **Usar Alert Dialog para todas as confirmações (NUNCA window.confirm)**
+
+### Após Criação
+- [ ] Testar em diferentes dispositivos
+- [ ] Verificar acessibilidade básica
+- [ ] Executar testes automatizados
+- [ ] Validar integração com backend
+- [ ] **Verificar se todas as rotas funcionam corretamente**
+- [ ] **Confirmar que não há erros de TypeScript relacionados a rotas**
+- [ ] **Testar todos os Alert Dialogs de confirmação**
+
+## Comandos Úteis
+
+```bash
+# Adicionar componente shadcn-vue
+npx shadcn-vue@latest add button
+
+# Adicionar Alert Dialog (obrigatório para confirmações)
+npx shadcn-vue@latest add alert-dialog
+
+# Executar testes
+php artisan test
+
+# Executar linter
+npm run lint
+
+# Build para produção (regenera rotas wayfinder)
+npm run build
+
+# Desenvolvimento com hot reload (regenera rotas automaticamente)
+npm run dev
+
+# Verificar rotas disponíveis no Laravel
+php artisan route:list
+
+# Limpar cache de rotas (se necessário)
+php artisan route:clear
+```
+
+## Wayfinder - Informações Adicionais
+
+### Localização dos Arquivos de Rotas
+- **Rotas geradas**: `resources/js/routes/`
+- **Configuração**: `vite.config.ts` (plugin wayfinder)
+- **Tipos**: Gerados automaticamente durante o build
+
+### Regeneração das Rotas
+As rotas são regeneradas automaticamente quando:
+- Executar `npm run build`
+- Executar `npm run dev`
+- Modificar arquivos de rota no Laravel
+- Executar comandos artisan relacionados a rotas
+
+## Exemplo Completo: Página de Listagem com Alert Dialog
+
+```vue
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Trash2 } from 'lucide-vue-next';
+import type { BreadcrumbItemType } from '@/types';
+
+interface Item {
+    id: number;
+    title: string;
+    status: 'active' | 'inactive';
+    created_at: string;
+}
+
+interface Props {
+    items: Item[];
+    loading?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    loading: false,
+});
+
+// Importar rotas necessárias
+import { index as itemsIndex, create as itemsCreate, edit as itemsEdit, destroy as itemsDestroy } from '@/routes/items';
+
+const breadcrumbs: BreadcrumbItemType[] = [
+    { title: 'Items', href: itemsIndex().url },
+];
+
+const deleteItem = (item: Item) => {
+    router.delete(itemsDestroy({ item: item.id }).url);
+};
+</script>
+
+<template>
+    <Head title="Items" />
+
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="flex h-full flex-1 flex-col gap-4 p-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-semibold">Items</h1>
+                <Button as-child>
+                    <Link :href="itemsCreate().url">
+                        Criar Item
+                    </Link>
+                </Button>
+            </div>
+
+            <!-- Loading State -->
+            <div v-if="loading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card v-for="i in 6" :key="i">
+                    <CardHeader>
+                        <Skeleton class="h-4 w-3/4" />
+                        <Skeleton class="h-3 w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                        <Skeleton class="h-8 w-20" />
+                    </CardContent>
+                </Card>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else-if="items.length === 0" class="flex flex-col items-center justify-center py-12">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold">Nenhum item encontrado</h3>
+                    <p class="text-muted-foreground">
+                        Comece criando seu primeiro item.
+                    </p>
+                    <Button class="mt-4" as-child>
+                        <Link :href="itemsCreate().url">
+                            Criar Primeiro Item
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+
+            <!-- Items Grid -->
+            <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card v-for="item in items" :key="item.id">
+                    <CardHeader>
+                        <CardTitle>{{ item.title }}</CardTitle>
+                        <Badge :variant="item.status === 'active' ? 'default' : 'secondary'">
+                            {{ item.status }}
+                        </Badge>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="flex justify-between">
+                            <Button variant="outline" size="sm" as-child>
+                                <Link :href="itemsEdit({ item: item.id }).url">
+                                    Editar
+                                </Link>
+                            </Button>
+                            
+                            <!-- ✅ CORRETO: Alert Dialog para confirmação -->
+                            <AlertDialog>
+                                <AlertDialogTrigger as-child>
+                                    <Button variant="destructive" size="sm">
+                                        <Trash2 class="h-3 w-3" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Tem certeza que deseja excluir "{{ item.title }}"?
+                                            Esta ação não pode ser desfeita.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction @click="deleteItem(item)">
+                                            Excluir
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    </AppLayout>
+</template>
+```

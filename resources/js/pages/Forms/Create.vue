@@ -215,7 +215,7 @@ const submit = () => {
                                     <Checkbox
                                         :id="`group-${group.id}`"
                                         :checked="form.subscriber_groups.includes(group.id)"
-                                        @update:checked="(checked) => {
+                                        @update:modelValue="(checked) => {
                                             if (checked) {
                                                 form.subscriber_groups.push(group.id);
                                             } else {

@@ -34,11 +34,7 @@ interface Props {
 const props = defineProps<Props>();
 
 // Criar objeto inicial do formulário baseado nos campos
-const initialData: Record<string, any> = {
-    email: '',
-    first_name: '',
-    last_name: '',
-};
+const initialData: Record<string, any> = {};
 
 props.form.fields.forEach(field => {
     if (field.type === 'checkbox') {
@@ -86,19 +82,19 @@ const getInputType = (fieldType: string) => {
 </script>
 
 <template>
-    <Head :title="form.name" />
+    <Head :title="props.form.name" />
 
     <div class="min-h-screen bg-background flex items-center justify-center p-4">
         <Card class="w-full max-w-2xl">
             <CardHeader class="text-center">
                 <CardTitle class="text-2xl">{{ form.name }}</CardTitle>
-                <p v-if="form.content" class="text-muted-foreground whitespace-pre-wrap">
-                    {{ form.content }}
+                <p v-if="props.form.content" class="text-muted-foreground whitespace-pre-wrap">
+                    {{ props.form.content }}
                 </p>
             </CardHeader>
             <CardContent>
                 <form @submit.prevent="submit" class="space-y-6">
-                    <div v-for="field in form.fields" :key="field.name" class="space-y-2">
+                    <div v-for="field in props.form.fields" :key="field.name" class="space-y-2">
                         <Label :for="field.name" class="flex items-center gap-1">
                             {{ field.label }}
                             <span v-if="field.required" class="text-destructive">*</span>
