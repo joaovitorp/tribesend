@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\FormController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\PublicFormController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -16,6 +18,16 @@ Route::get('dashboard', function () {
 Route::middleware(['auth', 'verified', 'user.has.no.team'])->group(function () {
     Route::get('/onboarding/team', [OnboardingController::class, 'create'])->name('onboarding.team.create');
     Route::post('/onboarding/team', [OnboardingController::class, 'store'])->name('onboarding.team.store');
+});
+
+// Public form routes - no authentication required
+Route::get('/f/{hash}', [PublicFormController::class, 'show'])->name('public.forms.show');
+Route::post('/f/{hash}/subscribe', [PublicFormController::class, 'subscribe'])->name('public.forms.subscribe');
+Route::get('/f/{hash}/success', [PublicFormController::class, 'success'])->name('forms.success');
+
+// Form management routes - authenticated users with teams
+Route::middleware(['auth', 'verified', 'user.has.team'])->group(function () {
+    Route::resource('forms', FormController::class);
 });
 
 require __DIR__.'/settings.php';

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('logo')->nullable();
             $table->string('domain')->nullable();
-            $table->string('subdomain')->nullable();
             $table->string('timezone')->nullable();
             $table->string('currency')->nullable();
             $table->string('language')->nullable();

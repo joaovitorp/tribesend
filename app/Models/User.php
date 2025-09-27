@@ -61,4 +61,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Team::class, 'owner_id');
     }
+
+    /**
+     * Get the user's current team (first owned team or first team as member).
+     */
+    public function getCurrentTeamAttribute(): ?Team
+    {
+        // Primeiro tenta pegar um team que o usuário é dono
+        $ownedTeam = $this->ownedTeams()->first();
+
+        if ($ownedTeam) {
+            return $ownedTeam;
+        }
+
+        // Se não é dono de nenhum, pega o primeiro team que é membro
+        return $this->teams()->first();
+    }
 }

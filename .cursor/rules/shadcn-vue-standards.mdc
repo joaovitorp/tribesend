@@ -6,6 +6,142 @@ alwaysApply: true
 
 # Padrões shadcn-vue + Inertia.js - TribeSend
 
+## Sistema de Rotas Wayfinder
+
+### Importação de Rotas
+O projeto usa o Laravel Wayfinder que gera automaticamente funções tipadas para todas as rotas. **NUNCA use a função `route()` global**. Sempre importe as rotas específicas:
+
+```typescript
+// ✅ Correto - Importar rotas específicas
+import { dashboard } from '@/routes';
+import { index as formsIndex, create as formsCreate, show as formsShow } from '@/routes/forms';
+import { login, register } from '@/routes';
+
+// ❌ Incorreto - Não usar route() global
+// route('forms.index') - NÃO FAZER ISSO
+```
+
+### Padrões de Uso
+```typescript
+// Para rotas simples (sem parâmetros)
+const dashboardUrl = dashboard().url;
+
+// Para rotas com parâmetros
+const formUrl = formsShow({ form: formId }).url;
+
+// Para formulários Inertia
+form.post(formsStore().url, data);
+
+// Para router do Inertia
+router.delete(formsDestroy({ form: formId }).url);
+```
+
+### Estrutura das Rotas Geradas
+Cada rota possui:
+- `.url` - URL da rota
+- `.method` - Método HTTP
+- `.definition` - Definição completa da rota
+- `.form` - Versão para formulários HTML
+
+### Padrões de Importação por Módulo
+```typescript
+// Rotas principais (dashboard, login, etc.)
+import { dashboard, login, register, logout } from '@/routes';
+
+// Rotas de formulários
+import { 
+    index as formsIndex, 
+    create as formsCreate, 
+    store as formsStore,
+    show as formsShow,
+    edit as formsEdit,
+    update as formsUpdate,
+    destroy as formsDestroy 
+} from '@/routes/forms';
+
+// Rotas públicas de formulários
+import { 
+    show as publicFormShow, 
+    subscribe as publicFormSubscribe,
+    success as publicFormSuccess 
+} from '@/routes/public';
+
+// Sempre usar alias descritivos para evitar conflitos
+import { index as usersIndex } from '@/routes/users';
+import { index as teamsIndex } from '@/routes/teams';
+```
+
+### Exemplos Práticos de Uso
+```typescript
+// Navegação simples
+const goToDashboard = () => router.visit(dashboard().url);
+
+// Navegação com parâmetros
+const viewForm = (formId: string) => router.visit(formsShow({ form: formId }).url);
+
+// Formulários POST/PUT/DELETE
+const createForm = (data: FormData) => {
+    form.post(formsStore().url, {
+        onSuccess: () => router.visit(formsIndex().url)
+    });
+};
+
+const updateForm = (formId: string, data: FormData) => {
+    form.put(formsUpdate({ form: formId }).url, {
+        onSuccess: () => router.visit(formsShow({ form: formId }).url)
+    });
+};
+
+const deleteForm = (formId: string) => {
+    router.delete(formsDestroy({ form: formId }).url, {
+        onSuccess: () => router.visit(formsIndex().url)
+    });
+};
+```
+
+### ❌ Erros Comuns a Evitar
+```typescript
+// ❌ NUNCA usar route() global
+const url = route('forms.index');
+const url = route('forms.show', { form: id });
+
+// ❌ NUNCA usar URLs hardcoded
+const url = '/forms';
+const url = `/forms/${id}`;
+
+// ❌ NUNCA importar sem alias quando há conflito
+import { index } from '@/routes/forms';
+import { index } from '@/routes/users'; // Conflito!
+
+// ❌ NUNCA usar .definition diretamente para navegação
+router.visit(formsIndex.definition.url); // Sem parâmetros!
+```
+
+### ✅ Boas Práticas
+```typescript
+// ✅ Sempre importar com alias descritivos
+import { index as formsIndex } from '@/routes/forms';
+import { index as usersIndex } from '@/routes/users';
+
+// ✅ Sempre usar .url para obter a URL final
+const url = formsIndex().url;
+const url = formsShow({ form: id }).url;
+
+// ✅ Agrupar importações por contexto
+import { dashboard } from '@/routes';
+import { 
+    index as formsIndex, 
+    create as formsCreate,
+    show as formsShow 
+} from '@/routes/forms';
+
+// ✅ Usar tipos TypeScript para parâmetros
+interface FormParams {
+    form: string | number;
+}
+const url = formsShow({ form: formId } as FormParams).url;
+```
+
 ## Estrutura de Arquivos
 
 ### Organização de Diretórios
@@ -62,11 +198,19 @@ interface Props {
 
 const props = defineProps<Props>();
 
+// Importar rotas necessárias
+import { dashboard } from '@/routes';
+import { index as itemsIndex } from '@/routes/items'; // Exemplo
+
 // Breadcrumbs para navegação
 const breadcrumbs: BreadcrumbItemType[] = [
     {
+        title: 'Dashboard',
+        href: dashboard().url,
+    },
+    {
         title: 'Nome da Página',
-        href: '#', // Use rotas nomeadas quando possível
+        href: itemsIndex().url,
     },
 ];
 </script>
@@ -92,6 +236,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// Importar rotas necessárias
+import { store as itemsStore, index as itemsIndex } from '@/routes/items';
 
 interface Props {
     // Props do formulário
@@ -104,9 +250,10 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('route.name'), {
+    form.post(itemsStore().url, {
         onSuccess: () => {
-            // Ação após sucesso
+            // Redirecionar para lista após sucesso
+            router.visit(itemsIndex().url);
         },
     });
 };
@@ -272,17 +419,22 @@ const emit = defineEmits<{
 ```vue
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+// Importar rotas necessárias
+import { dashboard } from '@/routes';
+import { index as formsIndex } from '@/routes/forms';
 </script>
 
 <template>
-    <!-- Para navegação interna -->
-    <Link href="/dashboard" class="text-primary hover:underline">
+    <!-- ❌ Evitar URLs hardcoded -->
+    <!-- <Link href="/dashboard">Dashboard</Link> -->
+    
+    <!-- ✅ Usar rotas do wayfinder -->
+    <Link :href="dashboard().url" class="text-primary hover:underline">
         Dashboard
     </Link>
     
-    <!-- Com rotas nomeadas (recomendado) -->
-    <Link :href="route('dashboard')" class="text-primary hover:underline">
-        Dashboard
+    <Link :href="formsIndex().url" class="text-primary hover:underline">
+        Formulários
     </Link>
 </template>
 ```
@@ -291,14 +443,17 @@ import { Link } from '@inertiajs/vue3';
 ```vue
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
+// Importar rotas necessárias
+import { store as actionsStore, index as actionsIndex } from '@/routes/actions';
 
 const handleAction = () => {
-    router.post(route('action.store'), data, {
+    router.post(actionsStore().url, data, {
         onSuccess: () => {
-            // Sucesso
+            // Redirecionar para lista após sucesso
+            router.visit(actionsIndex().url);
         },
         onError: () => {
-            // Erro
+            // Tratar erro
         },
     });
 };
@@ -363,6 +518,8 @@ it('renders the component correctly', function () {
 - [ ] Definir layout apropriado (App, Auth, etc.)
 - [ ] Planejar breadcrumbs e navegação
 - [ ] Definir props TypeScript
+- [ ] **Identificar rotas necessárias e seus aliases**
+- [ ] **Verificar se as rotas existem em `resources/js/routes/`**
 
 ### Durante o Desenvolvimento
 - [ ] Usar componentes shadcn-vue existentes
@@ -370,12 +527,17 @@ it('renders the component correctly', function () {
 - [ ] Adicionar validação de formulários
 - [ ] Garantir responsividade
 - [ ] Implementar dark mode se necessário
+- [ ] **Importar rotas com aliases descritivos**
+- [ ] **NUNCA usar `route()` global ou URLs hardcoded**
+- [ ] **Usar `.url` para todas as navegações**
 
 ### Após Criação
 - [ ] Testar em diferentes dispositivos
 - [ ] Verificar acessibilidade básica
 - [ ] Executar testes automatizados
 - [ ] Validar integração com backend
+- [ ] **Verificar se todas as rotas funcionam corretamente**
+- [ ] **Confirmar que não há erros de TypeScript relacionados a rotas**
 
 ## Comandos Úteis
 
@@ -389,9 +551,32 @@ php artisan test
 # Executar linter
 npm run lint
 
-# Build para produção
+# Build para produção (regenera rotas wayfinder)
 npm run build
+
+# Desenvolvimento com hot reload (regenera rotas automaticamente)
+npm run dev
+
+# Verificar rotas disponíveis no Laravel
+php artisan route:list
+
+# Limpar cache de rotas (se necessário)
+php artisan route:clear
 ```
+
+## Wayfinder - Informações Adicionais
+
+### Localização dos Arquivos de Rotas
+- **Rotas geradas**: `resources/js/routes/`
+- **Configuração**: `vite.config.ts` (plugin wayfinder)
+- **Tipos**: Gerados automaticamente durante o build
+
+### Regeneração das Rotas
+As rotas são regeneradas automaticamente quando:
+- Executar `npm run build`
+- Executar `npm run dev`
+- Modificar arquivos de rota no Laravel
+- Executar comandos artisan relacionados a rotas
 
 ## Exemplo Completo: Página de Listagem
 
@@ -421,13 +606,16 @@ const props = withDefaults(defineProps<Props>(), {
     loading: false,
 });
 
+// Importar rotas necessárias
+import { index as itemsIndex, create as itemsCreate, edit as itemsEdit, destroy as itemsDestroy } from '@/routes/items';
+
 const breadcrumbs: BreadcrumbItemType[] = [
-    { title: 'Items', href: route('items.index') },
+    { title: 'Items', href: itemsIndex().url },
 ];
 
 const deleteItem = (id: number) => {
     if (confirm('Tem certeza que deseja excluir?')) {
-        router.delete(route('items.destroy', id));
+        router.delete(itemsDestroy({ item: id }).url);
     }
 };
 </script>
@@ -440,7 +628,7 @@ const deleteItem = (id: number) => {
             <div class="flex items-center justify-between">
                 <h1 class="text-2xl font-semibold">Items</h1>
                 <Button as-child>
-                    <Link :href="route('items.create')">
+                    <Link :href="itemsCreate().url">
                         Criar Item
                     </Link>
                 </Button>
@@ -467,7 +655,7 @@ const deleteItem = (id: number) => {
                         Comece criando seu primeiro item.
                     </p>
                     <Button class="mt-4" as-child>
-                        <Link :href="route('items.create')">
+                        <Link :href="itemsCreate().url">
                             Criar Primeiro Item
                         </Link>
                     </Button>
@@ -486,7 +674,7 @@ const deleteItem = (id: number) => {
                     <CardContent>
                         <div class="flex justify-between">
                             <Button variant="outline" size="sm" as-child>
-                                <Link :href="route('items.edit', item.id)">
+                                <Link :href="itemsEdit({ item: item.id }).url">
                                     Editar
                                 </Link>
                             </Button>

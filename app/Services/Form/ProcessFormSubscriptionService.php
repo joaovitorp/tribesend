@@ -1,0 +1,89 @@
+<?php
+
+namespace App\Services\Form;
+
+use App\Models\Form;
+use App\Models\Subscriber;
+use App\Models\SubscriberGroup;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+class ProcessFormSubscriptionService
+{
+    /**
+     * Execute the form subscription process.
+     */
+    public function execute(Form $form, array $data): Subscriber
+    {
+        // Verificar se o formulário é válido
+        if (! $form->isValid()) {
+            throw ValidationException::withMessages([
+                'form' => ['Este formulário não está mais disponível.'],
+            ]);
+        }
+
+        // Verificar se o email já está inscrito em algum dos grupos
+        $existingSubscriber = Subscriber::where('team_id', $form->team_id)
+            ->where('email', $data['email'])
+            ->whereHas('subscriberGroups', function ($query) use ($form) {
+                $query->whereIn('subscriber_groups.id', $form->subscriber_groups);
+            })
+            ->first();
+
+        if ($existingSubscriber) {
+            throw ValidationException::withMessages([
+                'email' => ['Este email já está inscrito nesta lista.'],
+            ]);
+        }
+
+        return DB::transaction(function () use ($form, $data) {
+            // Criar ou encontrar o subscriber
+            $subscriber = Subscriber::firstOrCreate(
+                [
+                    'team_id' => $form->team_id,
+                    'email' => $data['email'],
+                ],
+                [
+                    'first_name' => $data['first_name'] ?? '',
+                    'last_name' => $data['last_name'] ?? '',
+                    'status' => 'active',
+                    'subscribed_at' => now(),
+                    'metadata' => $this->buildMetadata($form, $data),
+                ]
+            );
+
+            // Adicionar aos grupos do formulário
+            $subscriberGroups = SubscriberGroup::whereIn('id', $form->subscriber_groups)->get();
+
+            foreach ($subscriberGroups as $group) {
+                $subscriber->subscriberGroups()->syncWithoutDetaching([
+                    $group->id => ['id' => \Illuminate\Support\Str::ulid()],
+                ]);
+            }
+
+            return $subscriber->fresh();
+        });
+    }
+
+    /**
+     * Build metadata from form submission.
+     */
+    private function buildMetadata(Form $form, array $data): array
+    {
+        $metadata = [
+            'form_id' => $form->id,
+            'form_name' => $form->name,
+            'referral' => $form->referral,
+            'submitted_at' => now()->toISOString(),
+        ];
+
+        // Adicionar campos customizados
+        foreach ($form->fields as $field) {
+            if (isset($data[$field['name']])) {
+                $metadata['custom_fields'][$field['name']] = $data[$field['name']];
+            }
+        }
+
+        return $metadata;
+    }
+}
