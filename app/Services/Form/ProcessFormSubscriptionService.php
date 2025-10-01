@@ -6,6 +6,7 @@ use App\Models\Form;
 use App\Models\Subscriber;
 use App\Models\SubscriberGroup;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ProcessFormSubscriptionService
@@ -57,7 +58,7 @@ class ProcessFormSubscriptionService
 
             foreach ($subscriberGroups as $group) {
                 $subscriber->subscriberGroups()->syncWithoutDetaching([
-                    $group->id => ['id' => \Illuminate\Support\Str::ulid()],
+                    $group->id => ['id' => Str::uuid()],
                 ]);
             }
 

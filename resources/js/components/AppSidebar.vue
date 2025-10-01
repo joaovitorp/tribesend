@@ -13,9 +13,10 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as formsIndex } from '@/routes/forms';
+import { index as subscribersIndex } from '@/routes/subscribers';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FileText, Folder, LayoutGrid } from 'lucide-vue-next';
+import { BookOpen, FileText, Folder, LayoutGrid, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -28,6 +29,11 @@ const mainNavItems: NavItem[] = [
         title: 'Formulários',
         href: formsIndex().url,
         icon: FileText,
+    },
+    {
+        title: 'Assinantes',
+        href: subscribersIndex().url,
+        icon: Users,
     },
 ];
 
@@ -46,7 +52,7 @@ const footerNavItems: NavItem[] = [
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar collapsible="icon">
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>

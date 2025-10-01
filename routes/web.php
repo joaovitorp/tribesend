@@ -3,6 +3,7 @@
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PublicFormController;
+use App\Http\Controllers\SubscriberController;
 use App\Http\Controllers\SubscriberGroupController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,6 +30,7 @@ Route::get('/f/{hash}/success', [PublicFormController::class, 'success'])->name(
 // Form management routes - authenticated users with teams
 Route::middleware(['auth', 'verified', 'user.has.team'])->group(function () {
     Route::resource('forms', FormController::class);
+    Route::resource('subscribers', SubscriberController::class);
     Route::resource('subscriber-groups', SubscriberGroupController::class);
 });
 

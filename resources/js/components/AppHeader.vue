@@ -33,9 +33,10 @@ import { getInitials } from '@/composables/useInitials';
 import { toUrl, urlIsActive } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { index as formsIndex } from '@/routes/forms';
+import { index as subscribersIndex } from '@/routes/subscribers';
 import type { BreadcrumbItem, NavItem } from '@/types';
 import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, FileText, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
+import { BookOpen, FileText, Folder, LayoutGrid, Menu, Search, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -71,6 +72,11 @@ const mainNavItems: NavItem[] = [
         title: 'Formulários',
         href: formsIndex().url,
         icon: FileText,
+    },
+    {
+        title: 'Assinantes',
+        href: subscribersIndex().url,
+        icon: Users,
     },
 ];
 
