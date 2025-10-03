@@ -3,17 +3,18 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Campaign extends Model
 {
-    use HasUuid;
+    use HasFactory, HasUuid;
 
     protected $fillable = [
         'team_id',
-        'subscriber_group_id',
         'name',
         'subject',
         'body_html',
@@ -42,9 +43,25 @@ class Campaign extends Model
         return $this->belongsTo(Team::class);
     }
 
-    public function subscriberGroup(): BelongsTo
+    public function includedSegments(): BelongsToMany
     {
-        return $this->belongsTo(SubscriberGroup::class);
+        return $this->belongsToMany(Segment::class, 'campaign_segment')
+            ->wherePivot('type', 'include')
+            ->withTimestamps();
+    }
+
+    public function excludedSegments(): BelongsToMany
+    {
+        return $this->belongsToMany(Segment::class, 'campaign_segment')
+            ->wherePivot('type', 'exclude')
+            ->withTimestamps();
+    }
+
+    public function segments(): BelongsToMany
+    {
+        return $this->belongsToMany(Segment::class, 'campaign_segment')
+            ->withPivot('type')
+            ->withTimestamps();
     }
 
     public function campaignSends(): HasMany

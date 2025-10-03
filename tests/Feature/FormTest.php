@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Form;
-use App\Models\SubscriberGroup;
+use App\Models\Segment;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,7 +12,7 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     $this->team = Team::factory()->create(['owner_id' => $this->user->id]);
 
-    $this->subscriberGroup = SubscriberGroup::factory()->create([
+    $this->segment = Segment::factory()->create([
         'team_id' => $this->team->id,
     ]);
 });
@@ -31,7 +31,7 @@ test('user can create a form', function () {
 
     $formData = [
         'name' => 'Newsletter Test',
-        'subscriber_groups' => [$this->subscriberGroup->id],
+        'segments' => [$this->segment->id],
         'fields' => [
             [
                 'name' => 'email',
@@ -78,7 +78,7 @@ test('public form can be viewed by hash', function () {
 test('user can subscribe to a form', function () {
     $form = Form::factory()->create([
         'team_id' => $this->team->id,
-        'subscriber_groups' => [$this->subscriberGroup->id],
+        'segments' => [$this->segment->id],
         'fields' => [
             [
                 'name' => 'email',

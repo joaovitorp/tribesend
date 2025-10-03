@@ -26,6 +26,12 @@ import { watchDebounced } from '@vueuse/core';
 import { index as formsIndex, create as formsCreate, show as formsShow, edit as formsEdit, destroy as formsDestroy } from '@/routes/forms';
 import { show as publicFormsShow } from '@/routes/public/forms';
 
+interface Segment {
+    id: string;
+    name: string;
+    description?: string;
+}
+
 interface Form {
     id: string;
     name: string;
@@ -34,6 +40,8 @@ interface Form {
     expires_at: string | null;
     created_at: string;
     public_url?: string;
+    segments?: string[];
+    segment_details?: Segment[];
 }
 
 interface Props {
@@ -171,6 +179,19 @@ const getStatusBadge = (form: Form) => {
                     </CardHeader>
                     <CardContent>
                         <div class="flex flex-col gap-2">
+                            <!-- Segmentos -->
+                            <div v-if="form.segment_details && form.segment_details.length > 0" class="flex flex-wrap gap-1 mb-2">
+                                <Badge 
+                                    v-for="segment in form.segment_details" 
+                                    :key="segment.id" 
+                                    variant="outline"
+                                    class="text-xs"
+                                >
+                                    {{ segment.name }}
+                                </Badge>
+                            </div>
+                            
+
                             <!-- URL do formulário -->
                             <div class="flex items-center gap-2 p-2 bg-muted rounded text-sm">
                                 <code class="flex-1 truncate">

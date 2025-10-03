@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PublicFormController;
+use App\Http\Controllers\SegmentController;
 use App\Http\Controllers\SubscriberController;
-use App\Http\Controllers\SubscriberGroupController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -29,9 +30,14 @@ Route::get('/f/{hash}/success', [PublicFormController::class, 'success'])->name(
 
 // Form management routes - authenticated users with teams
 Route::middleware(['auth', 'verified', 'user.has.team'])->group(function () {
+    Route::resource('campaigns', CampaignController::class);
+    Route::get('campaigns/{campaign}/preview', [CampaignController::class, 'preview'])->name('campaigns.preview');
+    Route::post('campaigns/{campaign}/send', [CampaignController::class, 'send'])->name('campaigns.send');
+    Route::get('campaigns/{campaign}/sends', [CampaignController::class, 'sends'])->name('campaigns.sends');
+
     Route::resource('forms', FormController::class);
     Route::resource('subscribers', SubscriberController::class);
-    Route::resource('subscriber-groups', SubscriberGroupController::class);
+    Route::resource('segments', SegmentController::class);
 });
 
 require __DIR__.'/settings.php';

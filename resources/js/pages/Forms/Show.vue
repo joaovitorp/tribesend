@@ -17,11 +17,18 @@ interface FormField {
     options?: string[];
 }
 
+interface Segment {
+    id: string;
+    name: string;
+    description?: string;
+}
+
 interface Form {
     id: string;
     name: string;
     hash: string;
-    subscriber_groups: string[];
+    segments: string[];
+    segment_details?: Segment[];
     fields: FormField[];
     referral?: string;
     content?: string;
@@ -231,21 +238,27 @@ const getFieldTypeLabel = (type: string) => {
                 </CardContent>
             </Card>
 
-            <!-- Grupos de Assinantes -->
+            <!-- Segmentos -->
             <Card>
                 <CardHeader>
-                    <CardTitle>Grupos de Assinantes</CardTitle>
+                    <CardTitle>Segmentos</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div class="space-y-2">
                         <p class="text-sm text-muted-foreground">
-                            Os inscritos serão adicionados aos seguintes grupos:
+                            Os inscritos serão adicionados aos seguintes segmentos:
                         </p>
-                        <div class="flex flex-wrap gap-2">
-                            <Badge v-for="groupId in form.subscriber_groups" :key="groupId" variant="outline">
-                                {{ groupId }}
+                        <div v-if="form.segment_details && form.segment_details.length > 0" class="flex flex-wrap gap-2">
+                            <Badge v-for="segment in form.segment_details" :key="segment.id" variant="outline">
+                                {{ segment.name }}
+                                <span v-if="segment.description" class="ml-1 text-muted-foreground text-xs">
+                                    ({{ segment.description }})
+                                </span>
                             </Badge>
                         </div>
+                        <p v-else class="text-sm text-muted-foreground">
+                            Nenhum segmento configurado
+                        </p>
                     </div>
                 </CardContent>
             </Card>

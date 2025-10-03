@@ -46,9 +46,9 @@ class Team extends Model
         return $this->hasMany(Subscription::class);
     }
 
-    public function subscriberGroups(): HasMany
+    public function segments(): HasMany
     {
-        return $this->hasMany(SubscriberGroup::class);
+        return $this->hasMany(Segment::class);
     }
 
     public function subscribers(): HasMany

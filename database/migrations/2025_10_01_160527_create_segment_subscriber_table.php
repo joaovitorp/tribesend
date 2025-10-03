@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subscriber_subscriber_group', function (Blueprint $table) {
+        Schema::create('segment_subscriber', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('segment_id');
             $table->uuid('subscriber_id');
-            $table->uuid('subscriber_group_id');
             $table->timestamps();
 
+            $table->foreign('segment_id')->references('id')->on('segments')->onDelete('cascade');
             $table->foreign('subscriber_id')->references('id')->on('subscribers')->onDelete('cascade');
-            $table->foreign('subscriber_group_id')->references('id')->on('subscriber_groups')->onDelete('cascade');
-            $table->unique(['subscriber_id', 'subscriber_group_id']);
+            $table->unique(['segment_id', 'subscriber_id']);
         });
     }
 
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subscriber_subscriber_group');
+        Schema::dropIfExists('segment_subscriber');
     }
 };

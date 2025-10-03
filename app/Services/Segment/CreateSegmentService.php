@@ -1,27 +1,27 @@
 <?php
 
-namespace App\Services\SubscriberGroup;
+namespace App\Services\Segment;
 
-use App\Models\SubscriberGroup;
+use App\Models\Segment;
 use App\Models\Team;
 use Illuminate\Support\Facades\DB;
 
-class CreateSubscriberGroupService
+class CreateSegmentService
 {
     /**
-     * Execute the subscriber group creation process.
+     * Execute the segment creation process.
      */
-    public function execute(array $data, Team $team): SubscriberGroup
+    public function execute(array $data, Team $team): Segment
     {
         return DB::transaction(function () use ($data, $team) {
-            $subscriberGroup = SubscriberGroup::create([
+            $segment = Segment::create([
                 'team_id' => $team->id,
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
                 'is_active' => $data['is_active'] ?? true,
             ]);
 
-            return $subscriberGroup->fresh();
+            return $segment->fresh();
         });
     }
 }

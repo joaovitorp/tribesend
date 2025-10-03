@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subscriber_groups', function (Blueprint $table) {
+        Schema::create('segments', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('team_id');
             $table->string('name');
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subscriber_groups');
+        Schema::dropIfExists('segments');
     }
 };

@@ -18,7 +18,7 @@ class FormFactory extends Factory
     {
         return [
             'name' => $this->faker->sentence(3),
-            'subscriber_groups' => [],
+            'segments' => [],
             'fields' => [
                 [
                     'name' => 'email',

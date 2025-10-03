@@ -6,16 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import type { BreadcrumbItem } from '@/types';
 // Importar rotas necessárias
 import { dashboard } from '@/routes';
 import { index as subscribersIndex, update as subscribersUpdate } from '@/routes/subscribers';
-
-interface SubscriberGroup {
-    id: string;
-    name: string;
-}
 
 interface Subscriber {
     id: string;
@@ -23,12 +17,10 @@ interface Subscriber {
     first_name: string | null;
     last_name: string | null;
     status: 'active' | 'inactive' | 'unsubscribed';
-    subscriber_groups: SubscriberGroup[];
 }
 
 interface Props {
     subscriber: Subscriber;
-    subscriberGroups: SubscriberGroup[];
 }
 
 const props = defineProps<Props>();
@@ -53,7 +45,6 @@ const form = useForm({
     first_name: props.subscriber.first_name || '',
     last_name: props.subscriber.last_name || '',
     status: props.subscriber.status,
-    subscriber_groups: props.subscriber.subscriber_groups.map(group => group.id),
 });
 
 const submit = () => {
@@ -62,17 +53,6 @@ const submit = () => {
             // Redirecionamento será feito pelo controller
         },
     });
-};
-
-const toggleSubscriberGroup = (groupId: string, checked: boolean) => {
-    if (checked) {
-        form.subscriber_groups.push(groupId);
-    } else {
-        const index = form.subscriber_groups.indexOf(groupId);
-        if (index > -1) {
-            form.subscriber_groups.splice(index, 1);
-        }
-    }
 };
 </script>
 
@@ -157,33 +137,6 @@ const toggleSubscriberGroup = (groupId: string, checked: boolean) => {
                                 </Select>
                                 <p v-if="form.errors.status" class="text-sm text-destructive">
                                     {{ form.errors.status }}
-                                </p>
-                            </div>
-
-                            <!-- Grupos de Assinantes -->
-                            <div v-if="subscriberGroups.length > 0" class="space-y-2">
-                                <Label>Grupos de Assinantes</Label>
-                                <div class="space-y-3">
-                                    <div
-                                        v-for="group in subscriberGroups"
-                                        :key="group.id"
-                                        class="flex items-center space-x-2"
-                                    >
-                                        <Checkbox
-                                            :id="`group-${group.id}`"
-                                            :checked="form.subscriber_groups.includes(group.id)"
-                                            @update:checked="(checked) => toggleSubscriberGroup(group.id, checked)"
-                                        />
-                                        <Label
-                                            :for="`group-${group.id}`"
-                                            class="text-sm font-normal cursor-pointer"
-                                        >
-                                            {{ group.name }}
-                                        </Label>
-                                    </div>
-                                </div>
-                                <p v-if="form.errors.subscriber_groups" class="text-sm text-destructive">
-                                    {{ form.errors.subscriber_groups }}
                                 </p>
                             </div>
 

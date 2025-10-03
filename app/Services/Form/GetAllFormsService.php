@@ -35,6 +35,18 @@ class GetAllFormsService
             }
         }
 
-        return $query->latest()->paginate($filters['per_page'] ?? 15);
+        $paginator = $query->latest()->paginate($filters['per_page'] ?? 15);
+
+        // Carregar detalhes dos segmentos para cada formulário
+        $paginator->getCollection()->transform(function (Form $form) {
+            if (is_array($form->segments) && count($form->segments) > 0) {
+                $form->segment_details = \App\Models\Segment::whereIn('id', $form->segments)
+                    ->get(['id', 'name', 'description']);
+            }
+
+            return $form;
+        });
+
+        return $paginator;
     }
 }

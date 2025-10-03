@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Form\StoreFormRequest;
 use App\Http\Requests\Form\UpdateFormRequest;
 use App\Models\Form;
-use App\Models\SubscriberGroup;
+use App\Models\Segment;
 use App\Services\Form\CreateFormService;
 use App\Services\Form\DeleteFormService;
 use App\Services\Form\GetAllFormsService;
@@ -46,12 +46,12 @@ class FormController extends Controller
     public function create(Request $request): Response
     {
         $team = $request->user()->currentTeam;
-        $subscriberGroups = SubscriberGroup::where('team_id', $team->id)
+        $segments = Segment::where('team_id', $team->id)
             ->where('is_active', true)
             ->get(['id', 'name', 'description']);
 
         return Inertia::render('Forms/Create', [
-            'subscriberGroups' => $subscriberGroups,
+            'segments' => $segments,
         ]);
     }
 
@@ -86,13 +86,13 @@ class FormController extends Controller
     public function edit(Form $form, Request $request): Response
     {
         $team = $request->user()->currentTeam;
-        $subscriberGroups = SubscriberGroup::where('team_id', $team->id)
+        $segments = Segment::where('team_id', $team->id)
             ->where('is_active', true)
             ->get(['id', 'name', 'description']);
 
         return Inertia::render('Forms/Edit', [
             'form' => $form,
-            'subscriberGroups' => $subscriberGroups,
+            'segments' => $segments,
         ]);
     }
 

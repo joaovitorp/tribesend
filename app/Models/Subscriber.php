@@ -37,9 +37,9 @@ class Subscriber extends Model
         return $this->belongsTo(Team::class);
     }
 
-    public function subscriberGroups(): BelongsToMany
+    public function segments(): BelongsToMany
     {
-        return $this->belongsToMany(SubscriberGroup::class, 'subscriber_subscriber_group')
+        return $this->belongsToMany(Segment::class, 'segment_subscriber')
             ->withTimestamps();
     }
 

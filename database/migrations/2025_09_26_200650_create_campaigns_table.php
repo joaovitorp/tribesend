@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('campaigns', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('team_id');
-            $table->uuid('subscriber_group_id')->nullable();
             $table->string('name');
             $table->string('subject');
             $table->text('body_html');
@@ -31,7 +30,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
-            $table->foreign('subscriber_group_id')->references('id')->on('subscriber_groups')->onDelete('set null');
             $table->index(['team_id', 'status']);
             $table->index(['scheduled_at']);
         });

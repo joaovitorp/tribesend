@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('team_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('hash')->unique();
-            $table->json('subscriber_groups'); // Array de IDs dos grupos
+            $table->json('segments'); // Array de IDs dos segmentos
             $table->json('fields'); // Campos customizados do formulário
             $table->string('referral')->nullable(); // Campo de referência
             $table->longText('content')->nullable(); // Conteúdo/descrição do formulário

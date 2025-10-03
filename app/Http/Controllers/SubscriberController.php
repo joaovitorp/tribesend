@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Subscriber\StoreSubscriberRequest;
 use App\Http\Requests\Subscriber\UpdateSubscriberRequest;
 use App\Models\Subscriber;
-use App\Models\SubscriberGroup;
 use App\Services\Subscriber\CreateSubscriberService;
 use App\Services\Subscriber\DeleteSubscriberService;
 use App\Services\Subscriber\GetAllSubscribersService;
@@ -34,16 +33,9 @@ class SubscriberController extends Controller
         $team = $request->user()->currentTeam;
         $subscribers = $this->getAllSubscribersService->execute($team, $request->all());
 
-        // Get subscriber groups for filtering
-        $subscriberGroups = SubscriberGroup::where('team_id', $team->id)
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name']);
-
         return Inertia::render('Subscribers/Index', [
             'subscribers' => $subscribers,
-            'filters' => $request->only(['search', 'status', 'subscriber_group']),
-            'subscriberGroups' => $subscriberGroups,
+            'filters' => $request->only(['search', 'status']),
         ]);
     }
 
@@ -52,15 +44,7 @@ class SubscriberController extends Controller
      */
     public function create(Request $request): Response
     {
-        $team = $request->user()->currentTeam;
-        $subscriberGroups = SubscriberGroup::where('team_id', $team->id)
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name']);
-
-        return Inertia::render('Subscribers/Create', [
-            'subscriberGroups' => $subscriberGroups,
-        ]);
+        return Inertia::render('Subscribers/Create');
     }
 
     /**
@@ -101,17 +85,8 @@ class SubscriberController extends Controller
      */
     public function edit(Request $request, Subscriber $subscriber): Response
     {
-        $team = $request->user()->currentTeam;
-        $subscriberGroups = SubscriberGroup::where('team_id', $team->id)
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name']);
-
-        $subscriber->load('subscriberGroups');
-
         return Inertia::render('Subscribers/Edit', [
             'subscriber' => $subscriber,
-            'subscriberGroups' => $subscriberGroups,
         ]);
     }
 

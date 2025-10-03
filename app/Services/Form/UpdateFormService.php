@@ -15,7 +15,7 @@ class UpdateFormService
         return DB::transaction(function () use ($form, $data) {
             $form->update([
                 'name' => $data['name'],
-                'subscriber_groups' => $data['subscriber_groups'],
+                'segments' => $data['segments'],
                 'fields' => $data['fields'],
                 'referral' => $data['referral'] ?? null,
                 'content' => $data['content'] ?? null,

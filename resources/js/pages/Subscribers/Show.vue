@@ -21,11 +21,6 @@ import type { BreadcrumbItem } from '@/types';
 import { dashboard } from '@/routes';
 import { index as subscribersIndex, edit as subscribersEdit, destroy as subscribersDestroy } from '@/routes/subscribers';
 
-interface SubscriberGroup {
-    id: string;
-    name: string;
-}
-
 interface CampaignSend {
     id: string;
     campaign_id: string;
@@ -43,7 +38,6 @@ interface Subscriber {
     status: 'active' | 'inactive' | 'unsubscribed';
     subscribed_at: string;
     unsubscribed_at: string | null;
-    subscriber_groups: SubscriberGroup[];
     campaign_sends: CampaignSend[];
     total_campaigns_sent: number;
     last_campaign_sent: string | null;
@@ -195,30 +189,6 @@ const getStatusLabel = (status: string) => {
                             <span class="text-sm">
                                 Cancelado em {{ new Date(subscriber.unsubscribed_at).toLocaleDateString('pt-BR') }}
                             </span>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Grupos -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle class="flex items-center gap-2">
-                            <Users class="h-5 w-5" />
-                            Grupos de Assinantes
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div v-if="subscriber.subscriber_groups.length > 0" class="flex flex-wrap gap-2">
-                            <Badge
-                                v-for="group in subscriber.subscriber_groups"
-                                :key="group.id"
-                                variant="outline"
-                            >
-                                {{ group.name }}
-                            </Badge>
-                        </div>
-                        <div v-else class="text-sm text-muted-foreground">
-                            Não pertence a nenhum grupo
                         </div>
                     </CardContent>
                 </Card>

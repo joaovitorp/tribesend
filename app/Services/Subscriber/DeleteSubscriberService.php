@@ -11,12 +11,6 @@ class DeleteSubscriberService
      */
     public function execute(Subscriber $subscriber): bool
     {
-        // Detach from all subscriber groups
-        $subscriber->subscriberGroups()->detach();
-
         return $subscriber->delete();
     }
 }
-
-
-

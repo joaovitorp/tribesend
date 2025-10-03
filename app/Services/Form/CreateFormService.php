@@ -17,7 +17,7 @@ class CreateFormService
             $form = Form::create([
                 'team_id' => $team->id,
                 'name' => $data['name'],
-                'subscriber_groups' => $data['subscriber_groups'],
+                'segments' => $data['segments'],
                 'fields' => $data['fields'],
                 'referral' => $data['referral'] ?? null,
                 'content' => $data['content'] ?? null,

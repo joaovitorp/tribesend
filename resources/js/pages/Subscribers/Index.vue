@@ -26,11 +26,6 @@ import { watchDebounced } from '@vueuse/core';
 import { dashboard } from '@/routes';
 import { index as subscribersIndex, create as subscribersCreate, show as subscribersShow, edit as subscribersEdit, destroy as subscribersDestroy } from '@/routes/subscribers';
 
-interface SubscriberGroup {
-    id: string;
-    name: string;
-}
-
 interface Subscriber {
     id: string;
     email: string;
@@ -40,7 +35,6 @@ interface Subscriber {
     status: 'active' | 'inactive' | 'unsubscribed';
     subscribed_at: string;
     unsubscribed_at: string | null;
-    subscriber_groups: SubscriberGroup[];
     created_at: string;
 }
 
@@ -55,9 +49,7 @@ interface Props {
     filters: {
         search?: string;
         status?: string;
-        subscriber_group?: string;
     };
-    subscriberGroups: SubscriberGroup[];
 }
 
 const props = defineProps<Props>();
@@ -76,14 +68,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Filtros reativos
 const search = ref(props.filters.search || '');
 const status = ref(props.filters.status || 'all');
-const subscriberGroup = ref(props.filters.subscriber_group || 'all');
 
 // Aplicar filtros com debounce
-watchDebounced([search, status, subscriberGroup], () => {
+watchDebounced([search, status], () => {
     router.get(subscribersIndex().url, {
         search: search.value || undefined,
         status: status.value === 'all' ? undefined : status.value,
-        subscriber_group: subscriberGroup.value === 'all' ? undefined : subscriberGroup.value,
     }, {
         preserveState: true,
         replace: true,
@@ -149,7 +139,7 @@ const getStatusLabel = (status: string) => {
             <!-- Filtros -->
             <Card>
                 <CardContent class="pt-6">
-                    <div class="grid gap-4 md:grid-cols-3">
+                    <div class="grid gap-4 md:grid-cols-2">
                         <div class="space-y-2">
                             <Input
                                 v-model="search"
@@ -170,23 +160,6 @@ const getStatusLabel = (status: string) => {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div class="space-y-2">
-                            <Select v-model="subscriberGroup">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Todos os grupos" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Todos os grupos</SelectItem>
-                                    <SelectItem
-                                        v-for="group in subscriberGroups"
-                                        :key="group.id"
-                                        :value="group.id"
-                                    >
-                                        {{ group.name }}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -200,7 +173,7 @@ const getStatusLabel = (status: string) => {
                         <div class="text-center">
                             <h3 class="text-lg font-semibold">Nenhum assinante encontrado</h3>
                             <p class="text-muted-foreground mb-4">
-                                {{ search || status || subscriberGroup ? 'Tente ajustar os filtros ou' : '' }}
+                                {{ search || status ? 'Tente ajustar os filtros ou' : '' }}
                                 Comece adicionando seu primeiro assinante.
                             </p>
                             <Button as-child>
@@ -219,7 +192,6 @@ const getStatusLabel = (status: string) => {
                                 <TableHead>Email</TableHead>
                                 <TableHead>Nome</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead>Grupos</TableHead>
                                 <TableHead>Data de Inscrição</TableHead>
                                 <TableHead class="text-right">Ações</TableHead>
                             </TableRow>
@@ -236,21 +208,6 @@ const getStatusLabel = (status: string) => {
                                     <Badge :variant="getStatusBadgeVariant(subscriber.status)">
                                         {{ getStatusLabel(subscriber.status) }}
                                     </Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <div class="flex flex-wrap gap-1">
-                                        <Badge
-                                            v-for="group in subscriber.subscriber_groups"
-                                            :key="group.id"
-                                            variant="outline"
-                                            class="text-xs"
-                                        >
-                                            {{ group.name }}
-                                        </Badge>
-                                        <span v-if="subscriber.subscriber_groups.length === 0" class="text-muted-foreground text-sm">
-                                            Nenhum grupo
-                                        </span>
-                                    </div>
                                 </TableCell>
                                 <TableCell>
                                     {{ new Date(subscriber.subscribed_at).toLocaleDateString('pt-BR') }}
@@ -313,7 +270,6 @@ const getStatusLabel = (status: string) => {
                                 @click="router.get(subscribersIndex().url, { 
                                     search: search || undefined,
                                     status: status === 'all' ? undefined : status,
-                                    subscriber_group: subscriberGroup === 'all' ? undefined : subscriberGroup,
                                     page: subscribers.current_page - 1 
                                 })"
                             >
@@ -326,7 +282,6 @@ const getStatusLabel = (status: string) => {
                                 @click="router.get(subscribersIndex().url, { 
                                     search: search || undefined,
                                     status: status === 'all' ? undefined : status,
-                                    subscriber_group: subscriberGroup === 'all' ? undefined : subscriberGroup,
                                     page: subscribers.current_page + 1 
                                 })"
                             >

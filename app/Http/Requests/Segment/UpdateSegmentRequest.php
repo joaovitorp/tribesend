@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\SubscriberGroup;
+namespace App\Http\Requests\Segment;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateSubscriberGroupRequest extends FormRequest
+class UpdateSegmentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,8 +34,8 @@ class UpdateSubscriberGroupRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'O nome do grupo é obrigatório.',
-            'name.max' => 'O nome do grupo não pode ter mais de 255 caracteres.',
+            'name.required' => 'O nome do segmento é obrigatório.',
+            'name.max' => 'O nome do segmento não pode ter mais de 255 caracteres.',
             'description.max' => 'A descrição não pode ter mais de 1000 caracteres.',
         ];
     }

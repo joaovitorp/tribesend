@@ -11,7 +11,7 @@ class GetSubscriberDetailsService
      */
     public function execute(Subscriber $subscriber): Subscriber
     {
-        $subscriber->load(['subscriberGroups', 'campaignSends']);
+        $subscriber->load(['campaignSends']);
 
         // Add computed data
         $subscriber->total_campaigns_sent = $subscriber->campaignSends()->count();
@@ -22,6 +22,3 @@ class GetSubscriberDetailsService
         return $subscriber;
     }
 }
-
-
-

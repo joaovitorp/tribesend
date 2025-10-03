@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Services\SubscriberGroup;
+namespace App\Services\Segment;
 
-use App\Models\SubscriberGroup;
+use App\Models\Segment;
 use App\Models\Team;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class GetAllSubscriberGroupsService
+class GetAllSegmentsService
 {
     /**
-     * Execute the subscriber groups listing process.
+     * Execute the segments listing process.
      */
     public function execute(Team $team, array $filters = []): LengthAwarePaginator
     {
-        $query = SubscriberGroup::query()
+        $query = Segment::query()
             ->where('team_id', $team->id)
             ->withCount(['subscribers', 'campaigns']);
 

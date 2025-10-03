@@ -14,7 +14,7 @@ import { ref } from 'vue';
 // Importar rotas necessárias
 import { index as formsIndex, store as formsStore } from '@/routes/forms';
 
-interface SubscriberGroup {
+interface Segment {
     id: string;
     name: string;
     description?: string;
@@ -29,7 +29,7 @@ interface FormField {
 }
 
 interface Props {
-    subscriberGroups: SubscriberGroup[];
+    segments: Segment[];
 }
 
 const props = defineProps<Props>();
@@ -47,7 +47,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const form = useForm({
     name: '',
-    subscriber_groups: [] as string[],
+    segments: [] as string[],
     fields: [
         {
             name: 'email',
@@ -202,38 +202,38 @@ const submit = () => {
                     </CardContent>
                 </Card>
 
-                <!-- Grupos de Assinantes -->
+                <!-- Segmentos -->
                 <Card>
                     <CardHeader>
-                        <CardTitle>Grupos de Assinantes</CardTitle>
+                        <CardTitle>Segmentos</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="space-y-2">
-                            <Label>Selecione os grupos que receberão os inscritos</Label>
+                            <Label>Selecione os segmentos que receberão os inscritos</Label>
                             <div class="grid grid-cols-2 gap-4">
-                                <div v-for="group in subscriberGroups" :key="group.id" class="flex items-center space-x-2">
+                                <div v-for="segment in segments" :key="segment.id" class="flex items-center space-x-2">
                                     <Checkbox
-                                        :id="`group-${group.id}`"
-                                        :checked="form.subscriber_groups.includes(group.id)"
+                                        :id="`segment-${segment.id}`"
+                                        :checked="form.segments.includes(segment.id)"
                                         @update:modelValue="(checked) => {
                                             if (checked) {
-                                                form.subscriber_groups.push(group.id);
+                                                form.segments.push(segment.id);
                                             } else {
-                                                const index = form.subscriber_groups.indexOf(group.id);
-                                                if (index > -1) form.subscriber_groups.splice(index, 1);
+                                                const index = form.segments.indexOf(segment.id);
+                                                if (index > -1) form.segments.splice(index, 1);
                                             }
                                         }"
                                     />
-                                    <Label :for="`group-${group.id}`" class="text-sm">
-                                        {{ group.name }}
-                                        <span v-if="group.description" class="text-muted-foreground">
-                                            - {{ group.description }}
+                                    <Label :for="`segment-${segment.id}`" class="text-sm">
+                                        {{ segment.name }}
+                                        <span v-if="segment.description" class="text-muted-foreground">
+                                            - {{ segment.description }}
                                         </span>
                                     </Label>
                                 </div>
                             </div>
-                            <p v-if="form.errors.subscriber_groups" class="text-sm text-destructive">
-                                {{ form.errors.subscriber_groups }}
+                            <p v-if="form.errors.segments" class="text-sm text-destructive">
+                                {{ form.errors.segments }}
                             </p>
                         </div>
                     </CardContent>

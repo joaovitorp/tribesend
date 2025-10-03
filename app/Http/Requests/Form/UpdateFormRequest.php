@@ -23,8 +23,8 @@ class UpdateFormRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'subscriber_groups' => ['required', 'array', 'min:1'],
-            'subscriber_groups.*' => ['required', 'string', 'exists:subscriber_groups,id'],
+            'segments' => ['required', 'array', 'min:1'],
+            'segments.*' => ['required', 'string', 'exists:segments,id'],
             'fields' => ['required', 'array', 'min:1'],
             'fields.*.name' => ['required', 'string', 'max:255'],
             'fields.*.type' => ['required', 'string', 'in:text,email,phone,textarea,select,checkbox,radio'],
@@ -47,9 +47,9 @@ class UpdateFormRequest extends FormRequest
         return [
             'name.required' => 'O nome do formulário é obrigatório.',
             'name.max' => 'O nome do formulário não pode ter mais de 255 caracteres.',
-            'subscriber_groups.required' => 'Pelo menos um grupo de assinantes deve ser selecionado.',
-            'subscriber_groups.min' => 'Pelo menos um grupo de assinantes deve ser selecionado.',
-            'subscriber_groups.*.exists' => 'Um dos grupos selecionados não existe.',
+            'segments.required' => 'Pelo menos um segmento deve ser selecionado.',
+            'segments.min' => 'Pelo menos um segmento deve ser selecionado.',
+            'segments.*.exists' => 'Um dos segmentos selecionados não existe.',
             'fields.required' => 'Pelo menos um campo deve ser adicionado ao formulário.',
             'fields.min' => 'Pelo menos um campo deve ser adicionado ao formulário.',
             'fields.*.name.required' => 'O nome do campo é obrigatório.',

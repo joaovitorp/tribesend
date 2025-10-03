@@ -14,8 +14,7 @@ class GetAllSubscribersService
     public function execute(Team $team, array $filters = []): LengthAwarePaginator
     {
         $query = Subscriber::query()
-            ->where('team_id', $team->id)
-            ->with(['subscriberGroups']);
+            ->where('team_id', $team->id);
 
         if (isset($filters['search'])) {
             $search = $filters['search'];
@@ -30,15 +29,6 @@ class GetAllSubscribersService
             $query->where('status', $filters['status']);
         }
 
-        if (isset($filters['subscriber_group'])) {
-            $query->whereHas('subscriberGroups', function ($q) use ($filters) {
-                $q->where('subscriber_groups.id', $filters['subscriber_group']);
-            });
-        }
-
         return $query->latest()->paginate($filters['per_page'] ?? 15);
     }
 }
-
-
-

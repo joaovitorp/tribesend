@@ -26,8 +26,8 @@ class UpdateSubscriberRequest extends FormRequest
             'first_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'string', 'in:active,inactive,unsubscribed'],
-            'subscriber_groups' => ['nullable', 'array'],
-            'subscriber_groups.*' => ['string', 'exists:subscriber_groups,id'],
+            'segments' => ['nullable', 'array'],
+            'segments.*' => ['string', 'exists:segments,id'],
             'metadata' => ['nullable', 'array'],
         ];
     }
@@ -45,7 +45,7 @@ class UpdateSubscriberRequest extends FormRequest
             'last_name.max' => 'O sobrenome não pode ter mais de 255 caracteres.',
             'status.required' => 'O status é obrigatório.',
             'status.in' => 'Status inválido. Deve ser: ativo, inativo ou cancelado.',
-            'subscriber_groups.*.exists' => 'Um dos grupos selecionados não existe.',
+            'segments.*.exists' => 'Um dos segmentos selecionados não existe.',
         ];
     }
 }

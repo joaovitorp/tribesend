@@ -3,8 +3,8 @@
 namespace App\Services\Form;
 
 use App\Models\Form;
+use App\Models\Segment;
 use App\Models\Subscriber;
-use App\Models\SubscriberGroup;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -23,11 +23,11 @@ class ProcessFormSubscriptionService
             ]);
         }
 
-        // Verificar se o email já está inscrito em algum dos grupos
+        // Verificar se o email já está inscrito em algum dos segmentos
         $existingSubscriber = Subscriber::where('team_id', $form->team_id)
             ->where('email', $data['email'])
-            ->whereHas('subscriberGroups', function ($query) use ($form) {
-                $query->whereIn('subscriber_groups.id', $form->subscriber_groups);
+            ->whereHas('segments', function ($query) use ($form) {
+                $query->whereIn('segments.id', $form->segments);
             })
             ->first();
 
@@ -53,12 +53,12 @@ class ProcessFormSubscriptionService
                 ]
             );
 
-            // Adicionar aos grupos do formulário
-            $subscriberGroups = SubscriberGroup::whereIn('id', $form->subscriber_groups)->get();
+            // Adicionar aos segmentos do formulário
+            $segments = Segment::whereIn('id', $form->segments)->get();
 
-            foreach ($subscriberGroups as $group) {
-                $subscriber->subscriberGroups()->syncWithoutDetaching([
-                    $group->id => ['id' => Str::uuid()],
+            foreach ($segments as $segment) {
+                $subscriber->segments()->syncWithoutDetaching([
+                    $segment->id => ['id' => Str::uuid()],
                 ]);
             }
 

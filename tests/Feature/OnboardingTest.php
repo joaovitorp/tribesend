@@ -44,6 +44,10 @@ it('creates a team successfully', function () {
     $team = Team::where('name', 'My Awesome Team')->first();
     $this->assertTrue($team->users->contains($this->user));
     $this->assertEquals('owner', $team->users->where('id', $this->user->id)->first()->pivot->role);
+
+    // Verify the team was set as the user's current team
+    $this->user->refresh();
+    expect($this->user->current_team_id)->toBe($team->id);
 });
 
 it('validates required fields', function () {

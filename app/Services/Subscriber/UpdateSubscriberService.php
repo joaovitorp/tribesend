@@ -31,15 +31,12 @@ class UpdateSubscriberService
 
             $subscriber->update($updateData);
 
-            // Sync subscriber groups if provided
-            if (isset($data['subscriber_groups']) && is_array($data['subscriber_groups'])) {
-                $subscriber->subscriberGroups()->sync($data['subscriber_groups']);
+            // Sync segments if provided
+            if (isset($data['segments']) && is_array($data['segments'])) {
+                $subscriber->segments()->sync($data['segments']);
             }
 
-            return $subscriber->fresh(['subscriberGroups']);
+            return $subscriber->fresh(['segments']);
         });
     }
 }
-
-
-

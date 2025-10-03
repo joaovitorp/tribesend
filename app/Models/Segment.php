@@ -7,9 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class SubscriberGroup extends Model
+class Segment extends Model
 {
     use HasFactory, HasUuid;
 
@@ -34,12 +33,28 @@ class SubscriberGroup extends Model
 
     public function subscribers(): BelongsToMany
     {
-        return $this->belongsToMany(Subscriber::class, 'subscriber_subscriber_group')
+        return $this->belongsToMany(Subscriber::class, 'segment_subscriber')
             ->withTimestamps();
     }
 
-    public function campaigns(): HasMany
+    public function campaigns(): BelongsToMany
     {
-        return $this->hasMany(Campaign::class);
+        return $this->belongsToMany(Campaign::class, 'campaign_segment')
+            ->withPivot('type')
+            ->withTimestamps();
+    }
+
+    public function includedInCampaigns(): BelongsToMany
+    {
+        return $this->belongsToMany(Campaign::class, 'campaign_segment')
+            ->wherePivot('type', 'include')
+            ->withTimestamps();
+    }
+
+    public function excludedFromCampaigns(): BelongsToMany
+    {
+        return $this->belongsToMany(Campaign::class, 'campaign_segment')
+            ->wherePivot('type', 'exclude')
+            ->withTimestamps();
     }
 }

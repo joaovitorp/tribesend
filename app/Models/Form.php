@@ -17,7 +17,7 @@ class Form extends Model
         'team_id',
         'name',
         'hash',
-        'subscriber_groups',
+        'segments',
         'fields',
         'referral',
         'content',
@@ -28,7 +28,7 @@ class Form extends Model
     protected function casts(): array
     {
         return [
-            'subscriber_groups' => 'array',
+            'segments' => 'array',
             'fields' => 'array',
             'is_active' => 'boolean',
             'expires_at' => 'datetime',
@@ -51,13 +51,13 @@ class Form extends Model
         return $this->belongsTo(Team::class);
     }
 
-    public function subscriberGroupModels(): BelongsToMany
+    public function segmentModels(): BelongsToMany
     {
         return $this->belongsToMany(
-            SubscriberGroup::class,
-            'form_subscriber_group',
+            Segment::class,
+            'form_segment',
             'form_id',
-            'subscriber_group_id'
+            'segment_id'
         );
     }
 

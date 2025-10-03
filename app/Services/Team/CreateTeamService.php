@@ -31,6 +31,9 @@ class CreateTeamService
                 'updated_at' => now(),
             ]);
 
+            // Set this team as the user's current team
+            $owner->update(['current_team_id' => $team->id]);
+
             return $team->fresh();
         });
     }
