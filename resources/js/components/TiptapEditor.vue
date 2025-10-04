@@ -20,7 +20,7 @@ import {
     Link2,
     Unlink
 } from 'lucide-vue-next';
-import { watch, onBeforeUnmount } from 'vue';
+import { watch, onBeforeUnmount, ref } from 'vue';
 
 interface Props {
     modelValue: string;
@@ -96,6 +96,50 @@ const setLink = () => {
 
     editor.value.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
 };
+
+const insertHTML = (html: string) => {
+    if (!editor.value) {
+        return;
+    }
+    
+    editor.value.chain().focus().insertContent(html).run();
+};
+
+const isDraggingOver = ref(false);
+
+const handleDragEnter = (event: DragEvent) => {
+    event.preventDefault();
+    isDraggingOver.value = true;
+};
+
+const handleDragOver = (event: DragEvent) => {
+    event.preventDefault();
+};
+
+const handleDragLeave = (event: DragEvent) => {
+    event.preventDefault();
+    isDraggingOver.value = false;
+};
+
+const handleDrop = (event: DragEvent) => {
+    event.preventDefault();
+    isDraggingOver.value = false;
+    
+    if (!editor.value) {
+        return;
+    }
+
+    // Pegar o HTML do dataTransfer
+    const html = event.dataTransfer?.getData('text/html');
+    
+    if (html) {
+        editor.value.chain().focus().insertContent(html).run();
+    }
+};
+
+defineExpose({
+    insertHTML,
+});
 </script>
 
 <template>
@@ -239,10 +283,27 @@ const setLink = () => {
             </Button>
         </TiptapBubbleMenu>
         
-        <EditorContent 
-            :editor="editor" 
-            class="tiptap-content min-h-[400px] p-0"
-        />
+        <div
+            class="tiptap-drop-zone relative"
+            :class="{ 'is-dragging-over': isDraggingOver }"
+            @dragenter="handleDragEnter"
+            @dragover="handleDragOver"
+            @dragleave="handleDragLeave"
+            @drop="handleDrop"
+        >
+            <EditorContent 
+                :editor="editor" 
+                class="tiptap-content min-h-[400px] p-0"
+            />
+            <div 
+                v-if="isDraggingOver" 
+                class="absolute inset-0 flex items-center justify-center bg-primary/10 border-2 border-dashed border-primary rounded-lg pointer-events-none"
+            >
+                <p class="text-lg font-semibold text-primary">
+                    Solte o bloco aqui
+                </p>
+            </div>
+        </div>
     </div>
 </template>
 

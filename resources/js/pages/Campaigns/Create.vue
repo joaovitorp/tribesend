@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import TiptapEditor from '@/components/TiptapEditor.vue';
+import ContentBlocksLibrary from '@/components/ContentBlocksLibrary.vue';
 import { index as campaignsIndex, store as campaignsStore } from '@/routes/campaigns';
 import { ref, computed } from 'vue';
+import type { ContentBlock } from '@/types/content-blocks';
 
 interface Segment {
     id: string;
@@ -110,6 +112,10 @@ const cancelAndGoBack = () => {
         router.visit(campaignsIndex().url);
     }
 };
+
+const handleBlockDragStart = (block: ContentBlock) => {
+    console.log('Dragging block:', block.name);
+};
 </script>
 
 <template>
@@ -173,17 +179,33 @@ const cancelAndGoBack = () => {
             </div>
 
             <!-- Step 2: Content -->
-            <div v-if="currentStep === 2">
-                <Card class="border-0 shadow-none">
-                    <CardContent class="space-y-4 px-0">
-                        <div class="space-y-2">
-                            <TiptapEditor v-model="form.body_html" />
-                            <p v-if="form.errors.body_html" class="text-sm text-destructive">
-                                {{ form.errors.body_html }}
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
+            <div v-if="currentStep === 2" class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+                <!-- Biblioteca de Blocos -->
+                <div class="order-2 lg:order-1">
+                    <div class="sticky top-4">
+                        <ContentBlocksLibrary @block-drag-start="handleBlockDragStart" />
+                    </div>
+                </div>
+
+                <!-- Editor -->
+                <div class="order-1 lg:order-2">
+                    <Card class="border-0 shadow-none">
+                        <CardHeader class="px-0">
+                            <CardTitle class="text-2xl">Conteúdo da Campanha</CardTitle>
+                            <CardDescription class="text-base">
+                                Arraste blocos da biblioteca ou escreva seu próprio conteúdo
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="space-y-4 px-0">
+                            <div class="space-y-2">
+                                <TiptapEditor v-model="form.body_html" />
+                                <p v-if="form.errors.body_html" class="text-sm text-destructive">
+                                    {{ form.errors.body_html }}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
 
             <!-- Step 3: Segments -->

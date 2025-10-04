@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\SegmentController;
@@ -9,9 +10,8 @@ use App\Http\Controllers\SubscriberController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-})->name('home');
+Route::get('/', [LandingPageController::class, 'index'])->name('home');
+Route::post('/waitlist', [LandingPageController::class, 'subscribe'])->name('waitlist.subscribe');
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
