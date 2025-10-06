@@ -28,16 +28,30 @@ class LandingPageController extends Controller
     public function subscribe(StoreWaitlistRequest $request): RedirectResponse
     {
         try {
-            $this->storeWaitlistService->execute($request->validated());
+            $waitlist = $this->storeWaitlistService->execute($request->validated());
 
             return redirect()
-                ->back()
-                ->with('success', 'Obrigado! Você entrou na lista de espera para o TribeSend.');
+                ->route('waitlist.success')
+                ->with('email', $waitlist->email);
         } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->with('error', 'Erro ao processar sua inscrição. Tente novamente.')
                 ->withInput();
         }
+    }
+
+    /**
+     * Exibe a página de confirmação de inscrição.
+     */
+    public function success(): Response|RedirectResponse
+    {
+        if (! session()->has('email')) {
+            return redirect()->route('home');
+        }
+
+        return Inertia::render('Landing/Success', [
+            'email' => session('email'),
+        ]);
     }
 }

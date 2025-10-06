@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle2, Mail, Users, TrendingUp, Zap, Target, Send } from 'lucide-vue-next';
+import { CheckCircle2, Mail, Users, TrendingUp, Zap, Target, Send, Sparkles, Bot, ArrowLeft } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { subscribe as waitlistSubscribe } from '@/routes/waitlist';
@@ -126,7 +126,7 @@ const submit = () => {
                     </p>
                 </div>
 
-                <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                     <!-- Benefit 1 -->
                     <Card class="border-slate-200/50 transition-all hover:shadow-lg dark:border-slate-800/50">
                         <CardHeader>
@@ -142,7 +142,26 @@ const submit = () => {
                         </CardContent>
                     </Card>
 
-                    <!-- Benefit 2 -->
+                    <!-- Benefit 2 - NEW: AI Content Curation -->
+                    <Card class="group relative overflow-hidden border-slate-200/50 transition-all hover:scale-105 hover:shadow-2xl dark:border-slate-800/50">
+                        <div class="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-pink-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                        <CardHeader class="relative">
+                            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-600 dark:from-violet-900/30 dark:to-fuchsia-900/30 dark:text-violet-400">
+                                <Bot class="h-6 w-6 transition-transform duration-300 group-hover:rotate-12" />
+                            </div>
+                            <CardTitle class="flex items-center gap-2 text-xl">
+                                Curadoria AI
+                                <Sparkles class="h-4 w-4 text-violet-500 dark:text-violet-400" />
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent class="relative">
+                            <CardDescription class="text-base">
+                                Defina palavras-chave e fique por dentro dos melhores conteúdos. IA busca e organiza tudo para você automaticamente.
+                            </CardDescription>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Benefit 3 -->
                     <Card class="border-slate-200/50 transition-all hover:shadow-lg dark:border-slate-800/50">
                         <CardHeader>
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
@@ -157,7 +176,7 @@ const submit = () => {
                         </CardContent>
                     </Card>
 
-                    <!-- Benefit 3 -->
+                    <!-- Benefit 4 -->
                     <Card class="border-slate-200/50 transition-all hover:shadow-lg dark:border-slate-800/50">
                         <CardHeader>
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
@@ -172,7 +191,7 @@ const submit = () => {
                         </CardContent>
                     </Card>
 
-                    <!-- Benefit 4 -->
+                    <!-- Benefit 5 -->
                     <Card class="border-slate-200/50 transition-all hover:shadow-lg dark:border-slate-800/50">
                         <CardHeader>
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">

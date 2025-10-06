@@ -12,6 +12,7 @@ use Inertia\Inertia;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
 Route::post('/waitlist', [LandingPageController::class, 'subscribe'])->name('waitlist.subscribe');
+Route::get('/waitlist/success', [LandingPageController::class, 'success'])->name('waitlist.success');
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');

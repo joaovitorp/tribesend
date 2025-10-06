@@ -16,8 +16,8 @@ it('stores a waitlist subscription with valid email', function () {
         'email' => 'test@example.com',
     ]);
 
-    $response->assertRedirect();
-    $response->assertSessionHas('success', 'Obrigado! Você entrou na lista de espera para o TribeSend.');
+    $response->assertRedirect(route('waitlist.success'));
+    $response->assertSessionHas('email', 'test@example.com');
 
     $this->assertDatabaseHas('waitlists', [
         'email' => 'test@example.com',
@@ -30,8 +30,8 @@ it('stores a waitlist subscription with name and email', function () {
         'name' => 'John Doe',
     ]);
 
-    $response->assertRedirect();
-    $response->assertSessionHas('success');
+    $response->assertRedirect(route('waitlist.success'));
+    $response->assertSessionHas('email', 'john@example.com');
 
     $this->assertDatabaseHas('waitlists', [
         'email' => 'john@example.com',
@@ -86,8 +86,37 @@ it('allows different emails to subscribe', function () {
         'email' => 'second@example.com',
     ]);
 
-    $response->assertRedirect();
-    $response->assertSessionHas('success');
+    $response->assertRedirect(route('waitlist.success'));
+    $response->assertSessionHas('email', 'second@example.com');
 
     $this->assertDatabaseCount('waitlists', 2);
+});
+
+it('renders the success page with email', function () {
+    $response = $this->withSession(['email' => 'test@example.com'])
+        ->get(route('waitlist.success'));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Landing/Success')
+        ->has('email')
+        ->where('email', 'test@example.com')
+    );
+});
+
+it('redirects to home if accessing success page without email', function () {
+    $response = $this->get(route('waitlist.success'));
+
+    $response->assertRedirect(route('home'));
+});
+
+it('redirects to success page after successful subscription', function () {
+    $response = $this->post(route('waitlist.subscribe'), [
+        'email' => 'success@example.com',
+    ]);
+
+    $response->assertRedirect(route('waitlist.success'));
+
+    $followResponse = $this->followRedirects($response);
+    $followResponse->assertSuccessful();
 });
