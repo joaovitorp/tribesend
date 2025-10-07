@@ -37,6 +37,7 @@ export function useAnalytics() {
      * Evento de lead/conversão (evento recomendado do GA4)
      * Use este evento quando usuário se inscreve, preenche formulário, etc.
      * 
+     * @example trackLead({ method: 'waitlist_landing_page', value: 1 })
      * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events#generate_lead
      */
     const trackLead = (params: {
