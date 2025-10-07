@@ -18,5 +18,9 @@ fi
 echo "Starting Migrations..."
 php artisan migrate --force --no-interaction
 
+# Instalar dependências node 
+echo "Installing Node Dependencies..."
+npm install & npm run build
+
 # Executar o comando original
 exec "$@"
