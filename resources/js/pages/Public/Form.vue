@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 // Importar rotas necessárias
 import { subscribe as publicFormsSubscribe } from '@/routes/public/forms';
+import { useAnalytics } from '@/composables/useAnalytics';
 
 interface FormField {
     name: string;
@@ -32,6 +33,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { trackLead } = useAnalytics();
 
 // Criar objeto inicial do formulário baseado nos campos
 const initialData: Record<string, any> = {};
@@ -49,6 +51,12 @@ const form = useForm(initialData);
 const submit = () => {
     form.post(publicFormsSubscribe({ hash: props.form.hash }).url, {
         onSuccess: () => {
+            // Tracking de lead no GA4 (evento recomendado)
+            trackLead({
+                method: `public_form_${props.form.hash}`,
+                value: 1,
+            });
+
             // Redirecionamento será feito pelo controller
         },
     });

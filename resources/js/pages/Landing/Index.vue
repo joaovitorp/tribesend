@@ -8,10 +8,21 @@ import { CheckCircle2, Mail, Users, TrendingUp, Zap, Target, Send, Sparkles, Bot
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { subscribe as waitlistSubscribe } from '@/routes/waitlist';
+import { useAnalytics } from '@/composables/useAnalytics';
+
+interface FlashMessages {
+    success?: string;
+    error?: string;
+}
 
 const page = usePage();
-const successMessage = computed(() => page.props.flash?.success as string | undefined);
-const errorMessage = computed(() => page.props.flash?.error as string | undefined);
+const successMessage = computed(
+    () => (page.props.flash as FlashMessages | undefined)?.success
+);
+const errorMessage = computed(
+    () => (page.props.flash as FlashMessages | undefined)?.error
+);
+const { trackLead } = useAnalytics();
 
 const form = useForm({
     email: '',
@@ -22,6 +33,12 @@ const submit = () => {
     form.post(waitlistSubscribe().url, {
         preserveScroll: true,
         onSuccess: () => {
+            // Tracking de lead no GA4 (evento recomendado)
+            trackLead({
+                method: 'waitlist_landing_page',
+                value: 1,
+            });
+
             form.reset();
         },
     });
@@ -29,7 +46,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="TribeSend - Crie newsletters incríveis em minutos" />
+    <Head title="TribeSend - Create Amazing Newsletters in Minutes" />
 
     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-purple-950">
         <!-- Header -->
@@ -40,9 +57,9 @@ const submit = () => {
                     <h1 class="text-2xl font-bold text-slate-900 dark:text-white">TribeSend</h1>
                 </div>
                 <nav class="hidden items-center gap-6 md:flex">
-                    <a href="#benefits" class="text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Benefícios</a>
-                    <a href="#how-it-works" class="text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Como Funciona</a>
-                    <a href="#cta" class="text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Começar</a>
+                    <a href="#benefits" class="text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Benefits</a>
+                    <a href="#how-it-works" class="text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">How It Works</a>
+                    <a href="#cta" class="text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Get Started</a>
                 </nav>
             </div>
         </header>
@@ -51,15 +68,15 @@ const submit = () => {
         <section class="container mx-auto px-4 py-20 md:py-32">
             <div class="mx-auto max-w-4xl text-center">
                 <div class="mb-6 inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                    ✨ Plataforma para criadores de conteúdo
+                    ✨ Newsletter platform for content creators
                 </div>
                 
                 <h1 class="mb-6 text-5xl font-bold leading-tight text-slate-900 dark:text-white md:text-6xl lg:text-7xl">
-                    Crie newsletters incríveis em minutos
+                    Create Amazing Newsletters in Minutes
                 </h1>
                 
                 <p class="mb-10 text-xl text-slate-600 dark:text-slate-300 md:text-2xl">
-                    TribeSend ajuda criadores a compartilhar conteúdo com sua audiência de forma simples e sem complicação.
+                    TribeSend helps creators share content with their audience simply and effortlessly.
                 </p>
 
                 <!-- Success/Error Messages -->
@@ -86,7 +103,7 @@ const submit = () => {
                         <Input
                             v-model="form.email"
                             type="email"
-                            placeholder="Seu melhor email"
+                            placeholder="Enter your email address"
                             class="h-14 text-lg"
                             :class="{ 'border-destructive': form.errors.email }"
                         />
@@ -101,7 +118,7 @@ const submit = () => {
                         :disabled="form.processing"
                     >
                         <span class="relative z-10 flex items-center gap-2">
-                            {{ form.processing ? 'Enviando...' : 'Quero testar o TribeSend' }}
+                            {{ form.processing ? 'Sending...' : 'Get Early Access' }}
                             <Send class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
                         </span>
                         <div class="absolute inset-0 -z-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
@@ -109,7 +126,7 @@ const submit = () => {
                 </form>
 
                 <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">
-                    Sem cartão de crédito. Sem compromisso. Apenas seu email.
+                    No credit card required. No commitment. Just your email.
                 </p>
             </div>
         </section>
@@ -119,10 +136,10 @@ const submit = () => {
             <div class="container mx-auto px-4">
                 <div class="mb-16 text-center">
                     <h2 class="mb-4 text-4xl font-bold text-slate-900 dark:text-white md:text-5xl">
-                        Por que usar o TribeSend?
+                        Why Choose TribeSend?
                     </h2>
                     <p class="text-lg text-slate-600 dark:text-slate-300">
-                        Tudo que você precisa para criar e enviar newsletters profissionais
+                        Everything you need to create and send professional newsletters
                     </p>
                 </div>
 
@@ -133,11 +150,11 @@ const submit = () => {
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                                 <Zap class="h-6 w-6" />
                             </div>
-                            <CardTitle class="text-xl">Editor fácil de usar</CardTitle>
+                            <CardTitle class="text-xl">Easy-to-Use Editor</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <CardDescription class="text-base">
-                                Crie newsletters bonitas e profissionais em minutos, sem precisar saber código.
+                                Create beautiful, professional newsletters in minutes without any coding knowledge.
                             </CardDescription>
                         </CardContent>
                     </Card>
@@ -150,13 +167,13 @@ const submit = () => {
                                 <Bot class="h-6 w-6 transition-transform duration-300 group-hover:rotate-12" />
                             </div>
                             <CardTitle class="flex items-center gap-2 text-xl">
-                                Curadoria AI
+                                AI Content Curation
                                 <Sparkles class="h-4 w-4 text-violet-500 dark:text-violet-400" />
                             </CardTitle>
                         </CardHeader>
                         <CardContent class="relative">
                             <CardDescription class="text-base">
-                                Defina palavras-chave e fique por dentro dos melhores conteúdos. IA busca e organiza tudo para você automaticamente.
+                                Define keywords and stay updated with the best content. AI searches and organizes everything for you automatically.
                             </CardDescription>
                         </CardContent>
                     </Card>
@@ -167,11 +184,11 @@ const submit = () => {
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
                                 <Target class="h-6 w-6" />
                             </div>
-                            <CardTitle class="text-xl">Segmentação inteligente</CardTitle>
+                            <CardTitle class="text-xl">Smart Segmentation</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <CardDescription class="text-base">
-                                Organize sua audiência por interesses e envie conteúdo relevante para cada grupo.
+                                Organize your audience by interests and send relevant content to each group.
                             </CardDescription>
                         </CardContent>
                     </Card>
@@ -182,11 +199,11 @@ const submit = () => {
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
                                 <Mail class="h-6 w-6" />
                             </div>
-                            <CardTitle class="text-xl">Entregabilidade confiável</CardTitle>
+                            <CardTitle class="text-xl">Reliable Deliverability</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <CardDescription class="text-base">
-                                Seus emails chegam na caixa de entrada, não no spam. Garantido.
+                                Your emails reach the inbox, not spam. Guaranteed.
                             </CardDescription>
                         </CardContent>
                     </Card>
@@ -197,11 +214,11 @@ const submit = () => {
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
                                 <TrendingUp class="h-6 w-6" />
                             </div>
-                            <CardTitle class="text-xl">Estatísticas claras</CardTitle>
+                            <CardTitle class="text-xl">Clear Analytics</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <CardDescription class="text-base">
-                                Acompanhe aberturas, cliques e engajamento em tempo real com dashboards intuitivos.
+                                Track opens, clicks, and engagement in real-time with intuitive dashboards.
                             </CardDescription>
                         </CardContent>
                     </Card>
@@ -214,10 +231,10 @@ const submit = () => {
             <div class="container mx-auto px-4">
                 <div class="mb-16 text-center">
                     <h2 class="mb-4 text-4xl font-bold text-slate-900 dark:text-white md:text-5xl">
-                        Como funciona?
+                        How Does It Work?
                     </h2>
                     <p class="text-lg text-slate-600 dark:text-slate-300">
-                        Três passos simples para começar a enviar newsletters
+                        Three simple steps to start sending newsletters
                     </p>
                 </div>
 
@@ -230,10 +247,10 @@ const submit = () => {
                             </div>
                         </div>
                         <h3 class="mb-3 text-xl font-semibold text-slate-900 dark:text-white">
-                            Crie sua conta
+                            Create Your Account
                         </h3>
                         <p class="text-slate-600 dark:text-slate-300">
-                            Cadastre-se gratuitamente em menos de 1 minuto. Sem burocracia.
+                            Sign up for free in less than 1 minute. No hassle.
                         </p>
                     </div>
 
@@ -245,10 +262,10 @@ const submit = () => {
                             </div>
                         </div>
                         <h3 class="mb-3 text-xl font-semibold text-slate-900 dark:text-white">
-                            Importe seus assinantes
+                            Import Your Subscribers
                         </h3>
                         <p class="text-slate-600 dark:text-slate-300">
-                            Adicione sua lista existente ou crie formulários de captura personalizados.
+                            Add your existing list or create custom capture forms.
                         </p>
                     </div>
 
@@ -260,10 +277,10 @@ const submit = () => {
                             </div>
                         </div>
                         <h3 class="mb-3 text-xl font-semibold text-slate-900 dark:text-white">
-                            Envie sua primeira newsletter
+                            Send Your First Newsletter
                         </h3>
                         <p class="text-slate-600 dark:text-slate-300">
-                            Use nosso editor intuitivo e envie emails profissionais em minutos.
+                            Use our intuitive editor and send professional emails in minutes.
                         </p>
                     </div>
                 </div>
@@ -277,11 +294,11 @@ const submit = () => {
                     <Users class="mx-auto mb-6 h-16 w-16 text-white" />
                     
                     <h2 class="mb-6 text-4xl font-bold text-white md:text-5xl">
-                        Seja um dos primeiros a experimentar o TribeSend
+                        Be Among the First to Experience TribeSend
                     </h2>
                     
                     <p class="mb-10 text-xl text-blue-100">
-                        Junte-se à lista de espera e receba acesso antecipado quando lançarmos.
+                        Join the waitlist and get early access when we launch.
                     </p>
 
                     <!-- CTA Form -->
@@ -291,7 +308,7 @@ const submit = () => {
                                 <Input
                                     v-model="form.email"
                                     type="email"
-                                    placeholder="Seu melhor email"
+                                    placeholder="Enter your email address"
                                     class="h-14 border-white/20 bg-white/10 text-lg text-white placeholder:text-white/60 focus:bg-white focus:text-slate-900"
                                     :class="{ 'border-red-300': form.errors.email }"
                                 />
@@ -307,7 +324,7 @@ const submit = () => {
                                 :disabled="form.processing"
                             >
                                 <span class="relative z-10 flex items-center gap-2">
-                                    {{ form.processing ? 'Enviando...' : 'Entrar na lista de espera' }}
+                                    {{ form.processing ? 'Sending...' : 'Join Waitlist' }}
                                     <Mail class="h-5 w-5 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
                                 </span>
                                 <div class="absolute inset-0 -z-0 bg-gradient-to-r from-slate-900 to-slate-700 opacity-0 transition-opacity duration-300 group-hover:opacity-20"></div>
@@ -318,15 +335,15 @@ const submit = () => {
                     <div class="mt-6 flex items-center justify-center gap-6 text-sm text-blue-100">
                         <div class="flex items-center gap-2">
                             <CheckCircle2 class="h-5 w-5" />
-                            <span>Acesso antecipado</span>
+                            <span>Early access</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <CheckCircle2 class="h-5 w-5" />
-                            <span>Sem custo inicial</span>
+                            <span>No upfront cost</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <CheckCircle2 class="h-5 w-5" />
-                            <span>Suporte prioritário</span>
+                            <span>Priority support</span>
                         </div>
                     </div>
                 </div>
@@ -344,18 +361,18 @@ const submit = () => {
 
                     <nav class="flex flex-wrap justify-center gap-6">
                         <a href="#" class="text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
-                            Sobre
+                            About
                         </a>
                         <a href="#" class="text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
-                            Contato
+                            Contact
                         </a>
                         <a href="#" class="text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
-                            Política de Privacidade
+                            Privacy Policy
                         </a>
                     </nav>
 
                     <p class="text-sm text-slate-500 dark:text-slate-400">
-                        © 2025 TribeSend. Todos os direitos reservados.
+                        © 2025 TribeSend. All rights reserved.
                     </p>
                 </div>
             </div>

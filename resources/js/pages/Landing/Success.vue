@@ -13,7 +13,7 @@ const props = defineProps<Props>();
 </script>
 
 <template>
-    <Head title="Inscrição Confirmada - TribeSend" />
+    <Head title="Subscription Confirmed - TribeSend" />
 
     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-purple-950">
         <!-- Header -->
@@ -42,11 +42,11 @@ const props = defineProps<Props>();
                 <!-- Success Message -->
                 <div class="text-center">
                     <h1 class="mb-4 text-4xl font-bold text-slate-900 dark:text-white md:text-5xl lg:text-6xl">
-                        🎉 Inscrição Confirmada!
+                        🎉 Subscription Confirmed!
                     </h1>
                     
                     <p class="mb-8 text-xl text-slate-600 dark:text-slate-300 md:text-2xl">
-                        Obrigado por se inscrever na lista de espera do TribeSend!
+                        Thank you for joining the TribeSend waitlist!
                     </p>
                 </div>
 
@@ -55,7 +55,7 @@ const props = defineProps<Props>();
                     <CardHeader>
                         <div class="flex items-center gap-3">
                             <Mail class="h-6 w-6 text-green-600 dark:text-green-400" />
-                            <CardTitle class="text-green-900 dark:text-green-100">Email Cadastrado</CardTitle>
+                            <CardTitle class="text-green-900 dark:text-green-100">Registered Email</CardTitle>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -63,7 +63,7 @@ const props = defineProps<Props>();
                             {{ email }}
                         </p>
                         <p class="mt-2 text-sm text-green-600 dark:text-green-400">
-                            Você receberá atualizações e acesso antecipado neste email.
+                            You'll receive updates and early access at this email address.
                         </p>
                     </CardContent>
                 </Card>
@@ -71,7 +71,7 @@ const props = defineProps<Props>();
                 <!-- Next Steps -->
                 <div class="mb-12">
                     <h2 class="mb-6 text-center text-2xl font-bold text-slate-900 dark:text-white">
-                        O que acontece agora?
+                        What Happens Next?
                     </h2>
 
                     <div class="grid gap-6 md:grid-cols-3">
@@ -81,11 +81,11 @@ const props = defineProps<Props>();
                                 <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                                     <span class="text-xl font-bold">1</span>
                                 </div>
-                                <CardTitle class="text-lg">Confirmação por Email</CardTitle>
+                                <CardTitle class="text-lg">Email Confirmation</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <CardDescription class="text-base">
-                                    Verifique sua caixa de entrada. Enviamos um email de boas-vindas para você.
+                                    Check your inbox. We've sent you a welcome email.
                                 </CardDescription>
                             </CardContent>
                         </Card>
@@ -96,11 +96,11 @@ const props = defineProps<Props>();
                                 <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
                                     <span class="text-xl font-bold">2</span>
                                 </div>
-                                <CardTitle class="text-lg">Atualizações Regulares</CardTitle>
+                                <CardTitle class="text-lg">Regular Updates</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <CardDescription class="text-base">
-                                    Você receberá novidades sobre o desenvolvimento e lançamento do TribeSend.
+                                    You'll receive news about TribeSend's development and launch.
                                 </CardDescription>
                             </CardContent>
                         </Card>
@@ -111,11 +111,11 @@ const props = defineProps<Props>();
                                 <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
                                     <span class="text-xl font-bold">3</span>
                                 </div>
-                                <CardTitle class="text-lg">Acesso Antecipado</CardTitle>
+                                <CardTitle class="text-lg">Early Access</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <CardDescription class="text-base">
-                                    Você será um dos primeiros a testar a plataforma quando estiver pronta!
+                                    You'll be among the first to test the platform when it's ready!
                                 </CardDescription>
                             </CardContent>
                         </Card>
@@ -127,7 +127,7 @@ const props = defineProps<Props>();
                     <CardHeader>
                         <div class="flex items-center gap-3">
                             <Sparkles class="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                            <CardTitle class="text-blue-900 dark:text-blue-100">Benefícios Exclusivos</CardTitle>
+                            <CardTitle class="text-blue-900 dark:text-blue-100">Exclusive Benefits</CardTitle>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -135,25 +135,25 @@ const props = defineProps<Props>();
                             <li class="flex items-start gap-3">
                                 <CheckCircle2 class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
                                 <span class="text-blue-800 dark:text-blue-200">
-                                    <strong>Acesso antecipado</strong> à plataforma antes do lançamento oficial
+                                    <strong>Early access</strong> to the platform before official launch
                                 </span>
                             </li>
                             <li class="flex items-start gap-3">
                                 <CheckCircle2 class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
                                 <span class="text-blue-800 dark:text-blue-200">
-                                    <strong>Desconto especial</strong> na assinatura para early adopters
+                                    <strong>Special discount</strong> on subscription for early adopters
                                 </span>
                             </li>
                             <li class="flex items-start gap-3">
                                 <CheckCircle2 class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
                                 <span class="text-blue-800 dark:text-blue-200">
-                                    <strong>Suporte prioritário</strong> da equipe do TribeSend
+                                    <strong>Priority support</strong> from the TribeSend team
                                 </span>
                             </li>
                             <li class="flex items-start gap-3">
                                 <CheckCircle2 class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
                                 <span class="text-blue-800 dark:text-blue-200">
-                                    <strong>Influência no desenvolvimento</strong> com feedback direto para a equipe
+                                    <strong>Influence development</strong> with direct feedback to the team
                                 </span>
                             </li>
                         </ul>
@@ -163,10 +163,10 @@ const props = defineProps<Props>();
                 <!-- Social Share -->
                 <div class="mb-12 text-center">
                     <p class="mb-4 text-lg text-slate-600 dark:text-slate-300">
-                        Conhece alguém que também vai gostar do TribeSend?
+                        Know someone who would love TribeSend too?
                     </p>
                     <p class="text-sm text-slate-500 dark:text-slate-400">
-                        Compartilhe a lista de espera com seus amigos criadores de conteúdo!
+                        Share the waitlist with your content creator friends!
                     </p>
                 </div>
 
@@ -180,7 +180,7 @@ const props = defineProps<Props>();
                     >
                         <Link :href="home().url" class="flex items-center gap-2">
                             <ArrowLeft class="h-5 w-5 transition-transform duration-300 group-hover:-translate-x-1" />
-                            Voltar para Home
+                            Back to Home
                         </Link>
                     </Button>
 
@@ -190,12 +190,12 @@ const props = defineProps<Props>();
                         class="group w-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 hover:scale-105 hover:shadow-xl sm:w-auto"
                     >
                         <a 
-                            href="https://twitter.com/intent/tweet?text=Acabei%20de%20me%20inscrever%20na%20lista%20de%20espera%20do%20TribeSend!%20%F0%9F%9A%80%20Uma%20plataforma%20de%20newsletters%20para%20criadores%20de%20conte%C3%BAdo.%20%23TribeSend"
+                            href="https://twitter.com/intent/tweet?text=I%20just%20joined%20the%20TribeSend%20waitlist!%20%F0%9F%9A%80%20A%20newsletter%20platform%20for%20content%20creators.%20%23TribeSend"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="flex items-center gap-2"
                         >
-                            Compartilhar no Twitter
+                            Share on Twitter
                             <Send class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
                         </a>
                     </Button>
@@ -213,7 +213,7 @@ const props = defineProps<Props>();
                     </div>
 
                     <p class="text-sm text-slate-500 dark:text-slate-400">
-                        © 2025 TribeSend. Todos os direitos reservados.
+                        © 2025 TribeSend. All rights reserved.
                     </p>
                 </div>
             </div>
