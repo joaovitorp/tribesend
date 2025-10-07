@@ -73,5 +73,8 @@ COPY ./docker/api/nginx/error.html /var/www/html/error.html
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN apt update -y && apt install nano -y
 
+# Instalar dependências node 
+RUN npm install & npm run build
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
